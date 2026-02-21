@@ -2,41 +2,92 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的个人宇宙</title>
-    <style>
-        body {
-            font-family: "Microsoft YaHei", sans-serif; /* 设置字体 */
-            margin: 50px auto; /* 让内容在屏幕中间 */
-            max-width: 700px; /* 限制网页最大宽度，阅读起来更舒服 */
-            line-height: 1.8; /* 行间距 */
-            color: #333; /* 文字颜色：深灰色 */
-            background-color: #fcfcfc; /* 页面背景色：非常淡的浅灰白 */
-        }
-        h1 {
-            color: #2c3e50; /* 标题颜色 */
-            border-bottom: 2px solid #eee; /* 标题下面加一条浅色横线 */
-            padding-bottom: 10px;
-        }
-        .highlight {
-            background-color: #ffe0b2; /* 给文字加个橙色荧光笔背景 */
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGS - Visual Novel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <h1>你好，世界！我是 [在这里填你的名字] 👋</h1>
-    <p>欢迎来到我的个人主页！你现在看到的，是我完全从零开始、一行行代码搭起来的专属领地。</p>
 
-    <h3>📌 关于我</h3>
-    <p>我是一名新闻与传播专业的硕士生，但我对这个世界的好奇心不止于此。</p>
+    <div class="page-wrapper">
+        
+        <div class="main-container">
+            
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h1>GGS</h1>
+                    <p>Visual Novel</p>
+                </div>
 
-    <h3>🔬 我的折腾记录</h3>
-    <ul>
-        <li><span class="highlight">媒体观察</span>：喜欢拆解优秀慢综艺的叙事逻辑与价值建构。</li>
-        <li><span class="highlight">跨界探索</span>：偶尔也会写写代码、跑跑 OpenCV，感受硬核技术的乐趣。</li>
-    </ul>
+                <nav class="sidebar-menu">
+                    <ul>
+                        <li><a href="#"><i class="fa-solid fa-house"></i> 新站</a></li>
+                        <li><a href="#"><i class="fa-solid fa-cloud"></i> 云盘</a></li>
+                        <li><a href="#"><i class="fa-solid fa-snowflake"></i> 联盟</a></li>
+                        <li class="active"><a href="#"><i class="fa-solid fa-home"></i> 首页</a></li>
+                        <li>
+                            <a href="#"><i class="fa-solid fa-box-archive"></i> 归档</a>
+                            <span class="badge">147</span>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa-solid fa-tags"></i> 标签</a>
+                            <span class="badge">246</span>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa-solid fa-folder"></i> 分类</a>
+                            <span class="badge">10</span>
+                        </li>
+                        <li><a href="#"><i class="fa-solid fa-comment"></i> 留言</a></li>
+                        <li><a href="#"><i class="fa-solid fa-link"></i> 友链</a></li>
+                        <li><a href="#"><i class="fa-solid fa-info-circle"></i> 关于</a></li>
+                    </ul>
+                </nav>
 
-    <p>这只是一个开始，以后我会在这里放满我喜欢的东西。</p>
+                <div class="sidebar-widget">
+                    <img id="music-btn" src="https://t.alcy.cc/ycy"alt="Asuna Placeholder" style="cursor: pointer;">
+                    <p class="widget-title">Asuna</p>
+                    <p class="widget-subtitle">LINK START!</p>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                
+                <header class="article-header">
+                    <h2 class="sub-title" style="font-size: large;">いまふたりに <br>God bless...</h2>
+                    <h1 class="main-title">如今 神定将佑护我们</h1>
+                    
+                    <div class="article-meta">
+                        <span><i class="fa-regular fa-calendar"></i> 发表于 2024-04-04</span> | 
+                        <span><i class="fa-solid fa-clock-rotate-left"></i> 更新于 2025-07-18</span> | 
+                        <span><i class="fa-regular fa-folder"></i> 分类于 Other</span>
+                    </div>
+                </header>
+
+                <div class="article-image">
+                    <img src="https://picsum.photos/800/450" alt="Main Article Image">
+                </div>
+
+                <div class="article-content">
+                    <h3>碎碎念</h3>
+                    <ol>
+                        <li>好诶</li>
+                        <li>这东西是 <strong>真的</strong> 超级无敌<strong>好玩</strong></li>
+                        <li><code>万岁！！！！！！！！</code> </li>
+                    </ol>
+                </div>
+
+            </main>
+
+        </div>
+    </div>
+
+    <audio id="bg-music" src="" loop></audio>
+
+    <div id="web-pet" class="web-pet-container">
+        <div id="pet-dialog" class="pet-dialog">哇，你终于回来了~</div>
+        <img id="pet-img" src="pet.jpg" alt="桌宠">
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
