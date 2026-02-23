@@ -279,7 +279,7 @@ color: #ffffff;
 
 /* 1. 鼠标光彩拖尾 */
 .mouse-trail {
-    position: absolute;
+    position: fixed;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -295,7 +295,7 @@ color: #ffffff;
 
 /* 2. 点击烟花爆炸粒子 */
 .firework-particle {
-    position: absolute;
+    position: fixed;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -311,7 +311,7 @@ color: #ffffff;
 
 /* 3. 点击烟花爆炸圆环 */
 .firework-ring {
-    position: absolute;
+    position: fixed;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -706,8 +706,8 @@ color: #ffffff;
 
 .fps-box {
     position: fixed;
-    bottom: 15px; 
-    right: 15px;  
+    bottom: 10px; 
+    left: 15px;  
     /* 【修改】：将透明度从 0.6 提高到 0.85，背景变得更白、更实一点 */
     background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px); /* 稍微增加一点模糊度，质感更好 */
@@ -1406,7 +1406,7 @@ color: #ffffff;
 .global-player {
     position: fixed;
     left: 20px;
-    bottom: 20px;
+    bottom: 50px;
     z-index: 1000;
     display: flex;
     align-items: flex-end; 
@@ -1543,3 +1543,137 @@ color: #ffffff;
 /* 滚动条美化 */
 .playlist::-webkit-scrollbar { width: 6px; }
 .playlist::-webkit-scrollbar-thumb { background: rgba(116, 185, 255, 0.6); border-radius: 3px; }
+
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+.live2d-container {
+    position: fixed;
+    /*调整position距离右/下多少像素*/
+    right: -60px;
+    bottom: 0px; 
+    
+    /* 【在这里自由调整培养舱的实际大小】 */
+    width: 500px;   /* 可以改宽一点 */
+    height: 500px;  /* 亚丝娜比较高挑，可以改高一点 */
+    
+    z-index: 999;
+    pointer-events: none; 
+}
+
+#live2d-canvas {
+    width: 100%;
+    height: auto;
+    pointer-events: auto; 
+    cursor: pointer;
+}
+
+/* ================= 亚丝娜专属：对话气泡 ================= */
+.live2d-dialog {
+    position: absolute;
+    /* 气泡的垂直位置：如果你觉得气泡挡住了她的脸，就把 -30px 改小（比如 -50px 往上挪） */
+    top: 30px; 
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* 气泡外观设计 */
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--theme-pink, #ffb6c1); /* 用粉色描边 */
+    border-radius: 12px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5;
+    white-space: pre-wrap; /* 允许换行 */
+    
+    /* 动画与交互属性 */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none; /* 极其重要：防止气泡挡住你的鼠标点击 */
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (大尺寸灵动版) ================= */
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (加大超宽版) ================= */
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (加大超宽版) ================= */
+.live2d-dialog {
+    position: absolute;
+    /* 【位置上调】：从 5px 改成了 -15px，气泡会整体往上移 20 像素 */
+    /* 如果你觉得还不够高，可以继续改成 -25px 或者 -30px */
+    top: -15px; 
+    left: 50%;
+    
+    min-width: 260px; 
+    max-width: 320px; 
+    padding: 16px 28px; 
+    
+    background: rgba(250, 250, 250, 0.95);
+    border: 2px solid #ff9900; 
+    border-radius: 8px; 
+    
+    font-size: 15px; 
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); 
+    
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; 
+    z-index: 1000;
+    
+    transform: translateX(-50%);
+    transition: opacity 0.3s ease;
+}
+
+/* (保留你之前的 .live2d-dialog.show, @keyframes 和 ::after/before 代码，不要删) */
+
+/* 灵动呼吸动画 */
+.live2d-dialog.show {
+    opacity: 1;
+    visibility: visible;
+    animation: irregularFloat 4s ease-in-out infinite;
+}
+
+/* 不规则漂浮关键帧 */
+@keyframes irregularFloat {
+    0%   { transform: translateX(-50%) translate(0px, 0px) rotate(0deg); }
+    20%  { transform: translateX(-50%) translate(-4px, -6px) rotate(-1.5deg); }
+    40%  { transform: translateX(-50%) translate(3px, -10px) rotate(1deg); }
+    60%  { transform: translateX(-50%) translate(5px, -3px) rotate(2deg); }
+    80%  { transform: translateX(-50%) translate(-2px, 4px) rotate(-1deg); }
+    100% { transform: translateX(-50%) translate(0px, 0px) rotate(0deg); }
+}
+
+/* 【尾巴颜色同步回归：橙色边框 + 白色填充】 */
+.live2d-dialog::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 12px 10px 0;
+    border-style: solid;
+    border-color: #ff9900 transparent transparent transparent; /* 经典橙 */
+}
+.live2d-dialog::before {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 8px 0;
+    border-style: solid;
+    border-color: rgba(250, 250, 250, 0.95) transparent transparent transparent; /* 经典白 */
+    z-index: 1;
+}
+
+

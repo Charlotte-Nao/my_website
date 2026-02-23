@@ -28,8 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const trail = document.createElement('div');
         trail.className = 'mouse-trail';
         // 跟随鼠标坐标 (考虑网页滚动条的距离)
-        trail.style.left = e.pageX + 'px';
-        trail.style.top = e.pageY + 'px';
+        // 原本是 trail.style.left = e.pageX + 'px';
+        trail.style.left = e.clientX + 'px';
+        // 原本是 trail.style.top = e.pageY + 'px';
+        trail.style.top = e.clientY + 'px';
         // 随机抽取一个颜色
         trail.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         
@@ -50,8 +52,10 @@ document.addEventListener("DOMContentLoaded", () => {
             particle.className = 'firework-particle';
             
             // 初始位置设定在鼠标点击的地方
-            particle.style.left = e.pageX + 'px';
-            particle.style.top = e.pageY + 'px';
+            // 原本是 particle.style.left = e.pageX + 'px';
+            particle.style.left = e.clientX + 'px';
+            // 原本是 particle.style.top = e.pageY + 'px';
+            particle.style.top = e.clientY + 'px';
             particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             
             // 计算粒子飞行的随机角度和距离
@@ -76,8 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ring.className = 'firework-ring';
     
     // 设置圆环的初始位置（鼠标点击位置）
-    ring.style.left = e.pageX + 'px';
-    ring.style.top = e.pageY + 'px';
+    // 原本是 ring.style.left = e.pageX + 'px';
+    ring.style.left = e.clientX + 'px';
+    // 原本是 ring.style.top = e.pageY + 'px';
+    ring.style.top = e.clientY + 'px';
     
     // 随机选择一个鲜艳的颜色
     ring.style.borderColor = colors[Math.floor(Math.random() * colors.length)];
@@ -1216,6 +1222,143 @@ document.addEventListener("DOMContentLoaded", () => {
         // 启动计时器
         updateRuntime();
     }
+
+// ================= 模块十：Live2D 看板娘引擎 =================
+    const live2dContainer = document.getElementById('live2d-container');
+    const live2dCanvas = document.getElementById('live2d-canvas');
+
+    if (live2dCanvas) {
+        const app = new PIXI.Application({
+            view: live2dCanvas,
+            autoStart: true,
+            backgroundAlpha: 0,
+            resizeTo: live2dContainer, // 自动适配容器大小，防止比例拉伸
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true
+        });
+
+        // 【路径核对点】：请确保这里的文件名和文件夹里的完全一致
+        const modelUrl = "live2d_models/asuna/asuna_02.model.json"; 
+
+PIXI.live2d.Live2DModel.from(modelUrl).then(model => {
+            app.stage.addChild(model);
+
+            model.scale.set(0.18, 0.24); 
+            model.x = 0;
+            model.y = 260; 
+            live2dCanvas.style.cursor = 'pointer';
+
+            // 生成气泡，挂载到 live2dContainer 内部
+            const dialogBox = document.createElement('div');
+            dialogBox.id = 'live2d-dialog';
+            dialogBox.className = 'live2d-dialog';
+            live2dContainer.appendChild(dialogBox);
+            let dialogTimer = null;
+
+            const motions = {
+                fun: [0, 1, 2], sad: [3, 4, 5], sneeze: [6],
+                surprise: [7, 8, 9], repeat: [10, 11, 12], angry: [13, 14, 15]
+            };
+            const headPool = [...motions.fun, ...motions.surprise];
+            const bodyPool = [...motions.angry, ...motions.sad, ...motions.sneeze, ...motions.repeat];
+
+// ================= 亚丝娜专属：海量互动语录库 =================
+            
+            // 1. 摸头区 (温柔、日常、害羞、开心、治愈)
+            const headDialogues = [
+                "嘿嘿，今天也要一起努力哦！",
+                "稍微有点害羞呢……不过，并不讨厌啦。",
+                "怎么啦？突然这样摸人家的头……",
+                "有什么开心的事吗？笑得这么灿烂。",
+                "既然你这么闲的话，要不要来帮我做三明治？",
+                "今天天气真好呢，要一起去第 22 层的森林散步吗？",
+                "辛苦啦！先把剑放下，喝杯热茶休息一下吧。",
+                "结衣刚才还在找你呢，不去陪陪她吗？",
+                "摸头可是会让人长不高的！……不过，下不为例哦。",
+                "嗯……这种感觉，很让人安心呢。",
+                "每次看到你平安回来，我就彻底放心了。",
+                "好啦好啦，乖孩子乖孩子~（笑）"
+            ];
+
+            // 2. 袭胸区 (极度生气、傲娇警告、副团长威严、武力威胁)
+            const chestDialogues = [
+                "呀！你在摸哪里啊，变态！",
+                "再乱碰的话，我可要拔剑了哦！闪烁之光可不是吃素的！",
+                "唔……你这算是性骚扰哦，小心我吃掉你的属性点！",
+                "你、你这家伙！快把手拿开啦！",
+                "系统警告！这里可是圈内（安全区），不要做奇怪的动作！",
+                "就算在 SAO 里没有痛觉，这种行为也是绝对禁止的！",
+                "副团长的威严都要被你破坏了啦！给我去墙角反省一下！",
+                "信不信我用八连击的『星屑飞溅』把你打飞出艾恩葛朗特？",
+                "……你再这样，明天的早餐就只有发硬的黑面包了哦！"
+            ];
+
+            // 3. 戳腹部/边缘区 (日常抱怨、打喷嚏、游戏设定、料理诱惑)
+            const bodyDialogues = [
+                "真是的，好好工作啦，不要老是发呆！",
+                "就算你这样一直戳我，我也不会马上给你做料理的啦！",
+                "阿嚏！……难道是有人在说我坏话？",
+                "别闹了啦，马上就要到楼层 Boss 的攻略会议时间了！",
+                "哎呀，戳那里有点痒啦~",
+                "肚子饿了吗？我包里还有之前用杂烩兔做好的特级炖肉哦。",
+                "不要一直盯着我看啦，我的 HP 又没掉。",
+                "今天你的状态不错嘛，有没有去野外好好练级？",
+                "喂喂，身为攻略组的一员，可不要在这种地方偷懒啊！",
+                "武器耐久度还好吗？回城的时候记得去莉兹的店里修理一下哦。",
+                "如果累了的话，就在长椅上稍微睡一会儿吧，我帮你看着系统警报。"
+            ];
+
+            live2dCanvas.addEventListener('click', (event) => {
+                const rect = live2dCanvas.getBoundingClientRect();
+                const clickY = event.clientY - rect.top;
+                const relativeY = clickY / rect.height; 
+                
+                let chosenIndex;
+                let spokenText = "";
+
+                // 【核心：三段式物理切割】
+                if (relativeY < 0.45) {
+                    // 【第一段：0% ~ 45%】 头部区域
+                    chosenIndex = headPool[Math.floor(Math.random() * headPool.length)];
+                    spokenText = headDialogues[Math.floor(Math.random() * headDialogues.length)];
+                    
+                } else if (relativeY >= 0.45 && relativeY < 0.65) {
+                    // 【第二段：45% ~ 65%】 胸部区域 (脖子以下到胃部以上)
+                    // 强制只抽取生气的动作 (angry)
+                    chosenIndex = motions.angry[Math.floor(Math.random() * motions.angry.length)];
+                    spokenText = chestDialogues[Math.floor(Math.random() * chestDialogues.length)];
+                    
+                } else {
+                    // 【第三段：65% ~ 100%】 腹部及边缘区域
+                    // 抽取委屈、打喷嚏、特殊连击动作
+                    const otherBodyPool = [...motions.sad, ...motions.sneeze, ...motions.repeat];
+                    chosenIndex = otherBodyPool[Math.floor(Math.random() * otherBodyPool.length)];
+                    spokenText = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)];
+                }
+
+                // 执行动作与台词
+                model.motion('', chosenIndex);
+                dialogBox.innerHTML = spokenText;
+                
+                dialogBox.classList.remove('show');
+                void dialogBox.offsetWidth; 
+                dialogBox.classList.add('show');
+
+                clearTimeout(dialogTimer);
+                dialogTimer = setTimeout(() => {
+                    dialogBox.classList.remove('show');
+                }, 4500); 
+            });
+
+            console.log("🌸 亚丝娜(不规则悬浮气泡版)已接入！");
+        }).catch(err => {
+            console.error("❌ 模型加载失败:", err);
+        });
+        
+
+    }
+    
+
 
 
 
