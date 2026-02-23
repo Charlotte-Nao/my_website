@@ -1676,4 +1676,21 @@ color: #ffffff;
     z-index: 1;
 }
 
+/* ================= 终极防御：打破物理结界 ================= */
+
+/* 1. 把侧边栏的层级拉到极限，无视一切遮挡！ */
+.sidebar {
+    position: relative !important;
+    z-index: 999999 !important; 
+}
+
+/* 2. 剥夺真凶（播放器外壳、亚丝娜外壳）的物理碰撞体积 */
+#global-player, #live2d-container {
+    pointer-events: none !important; 
+}
+
+/* 3. 单独给里面的按钮和亚丝娜身体恢复碰撞，保证能点歌、能摸头 */
+#player-toggle, .player-panel, #live2d-canvas {
+    pointer-events: auto !important; 
+}
 

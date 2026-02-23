@@ -8,164 +8,83 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
     <div class="page-wrapper">
-        
         <div class="main-container">
-            
-<aside class="sidebar">
-                
-                <div class="sidebar-block">
-                    <div class="sidebar-header">
-                        <h1 style="font-size: 32px; letter-spacing: 2px;">FLA</h1>
-                        <p style="font-size: 13px; opacity: 0.8;">Blue Rose System</p>
-                    </div>
+            <aside class="sidebar">
+                <div class="sidebar-block"><div class="sidebar-header"><h1 style="font-size: 32px; letter-spacing: 2px;">FLA</h1><p style="font-size: 13px; opacity: 0.8;">Blue Rose System</p></div>
                     <nav class="sidebar-menu" style="padding: 15px 10px;">
                         <ul>
                             <li><a href="WA.html"><i class="fa-solid fa-droplet"></i> WA</a></li>
                             <li class="active"><a href="schedule.html"><i class="fa-solid fa-calendar-days"></i> 课表</a></li>
                             <li><a href="remind.html"><i class="fa-solid fa-note-sticky"></i> 备忘</a></li>
-                            <li ><a href="index.html"><i class="fa-solid fa-home"></i> 首页</a></li>
-                            <li>
-                                <a href="#"><i class="fa-solid fa-box-archive"></i> 归档</a>
-                                <span class="badge">147</span>
-                            </li>
-                            <li>
-                                <a href="label.html"><i class="fa-solid fa-tags"></i> 标签</a>
-                                <span class="badge">246</span>
-                            </li>
-                            <li>
-                                <a href="#"><i class="fa-solid fa-folder"></i> 分类</a>
-                                <span class="badge">10</span>
-                            </li>
+                            <li><a href="index.html"><i class="fa-solid fa-home"></i> 首页</a></li>
+                            <li><a href="archive.html"><i class="fa-solid fa-box-archive"></i> 归档</a><span class="badge">147</span></li>
+                            <li><a href="label.html"><i class="fa-solid fa-tags"></i> 标签</a><span class="badge">246</span></li>
+                            <li><a href="#"><i class="fa-solid fa-folder"></i> 分类</a><span class="badge">10</span></li>
                             <li><a href="left.html"><i class="fa-solid fa-comment"></i> 留言</a></li>
                             <li><a href="#"><i class="fa-solid fa-link"></i> 友链</a></li>
-                            <li ><a href="about.html"><i class="fa-solid fa-info-circle"></i> 关于</a></li>
+                            <li><a href="about.html"><i class="fa-solid fa-info-circle"></i> 关于</a></li>
                         </ul>
                     </nav>
                 </div>
-
-                <div class="sidebar-block developer-profile">
-                    <img class="profile-avatar" src="Charlotte.jpg" alt="Avatar">
-                    <h3 class="profile-name">Charlotte</h3>
-                    <p class="profile-signature">「 哪怕是虚幻的世界，这份感情也是真实的。」</p>
-                </div>
-
-                <div class="sidebar-block sidebar-links-section">
-                    <div class="links-title"><i class="fa-solid fa-globe"></i> 传送门</div>
-                    <ul class="sidebar-links-list">
-                        <li><a href="https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md" target="_blank">提问的智慧 - ryanhanwu</a></li>
-                        <li><a href="https://vndb.org" target="_blank">vndb - 视觉小说数据库</a></li>
-                        <li><a href="https://bgm.tv" target="_blank">Bangumi 番组计划</a></li>
-                        <li><a href="https://moegirl.uk" target="_blank">萌娘百科 - 万物皆可萌</a></li>
-                        <li><a href="https://zh.wikipedia.org" target="_blank">维基百科 - 自由的百科全书</a></li>
-                    </ul>
-                </div>
-
+                <div class="sidebar-block developer-profile"><img class="profile-avatar" src="Charlotte.jpg"><h3 class="profile-name">Charlotte</h3><p class="profile-signature">「 哪怕是虚幻的世界，这份感情也是真实的。」</p></div>
             </aside>
 
-<main class="content-area">
+            <main id="magic-screen" class="content-area">
                 <header class="article-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h1 class="main-title" style="margin: 0;">我的课表</h1>
-                    
                     <div class="week-nav">
                         <button class="icon-btn" onclick="changeWeek(-1)"><i class="fa-solid fa-angle-left"></i></button>
                         <span id="week-display" style="font-weight: bold; margin: 0 15px;">第 4 周 (03/23 - 03/29)</span>
                         <button class="icon-btn" onclick="changeWeek(1)"><i class="fa-solid fa-angle-right"></i></button>
                     </div>
-
                 </header>
 
-                <div class="schedule-box">
-                    <div class="schedule-grid" id="schedule-grid">
-                        </div>
-                </div>
+                <div class="schedule-box"><div class="schedule-grid" id="schedule-grid"></div></div>
 
                 <div class="ddl-section">
-                    <h2 class="sub-title" style="margin-bottom: 15px; border-bottom: 2px dashed var(--glass-border); padding-bottom: 10px;">
-                        <i class="fa-solid fa-stopwatch"></i> 死线追踪 (DDL)
-                    </h2>
-                    
+                    <h2 class="sub-title" style="margin-bottom: 15px; border-bottom: 2px dashed var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-stopwatch"></i> 死线追踪 (DDL)</h2>
                     <div class="ddl-input-box">
-                        <input type="text" id="ddl-task-input" placeholder="输入待办事项 (如: 操作系统实验报告)...">
+                        <input type="text" id="ddl-task-input" placeholder="输入待办事项...">
                         <input type="date" id="ddl-date-input">
                         <button id="ddl-add-btn" class="anime-btn confirm" style="padding: 8px 15px; border-radius: 6px;">添加 DDL</button>
                     </div>
+                    <div id="ddl-list" class="ddl-list"></div>
+                </div>
 
-                    <div id="ddl-list" class="ddl-list">
+                <div id="course-modal" class="anime-modal-overlay">
+                    <div class="anime-modal-box" style="width: 350px;">
+                        <div class="anime-modal-header">✍️ 编辑课程</div>
+                        <div class="anime-modal-body" style="text-align: left;">
+                            <input type="hidden" id="course-edit-id">
+                            <label>有效周次:</label>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;"><input type="number" id="course-start-week" class="wa-comment-input" value="1"><span style="line-height: 30px; color: #999;">-</span><input type="number" id="course-end-week" class="wa-comment-input" value="16"></div>
+                            <label>单双周:</label><select id="course-week-type" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;"><option value="all">全周都要上</option><option value="odd">只上单周</option><option value="even">只上双周</option></select>
+                            <label>星期几 (1-7):</label><input type="number" id="course-day" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
+                            <label>开始节次 (1-12):</label><input type="number" id="course-start" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
+                            <label>结束节次 (1-12):</label><input type="number" id="course-end" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
+                            <label>课程名称:</label><input type="text" id="course-name" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
+                            <label>教室/地点:</label><input type="text" id="course-room" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
                         </div>
+                        <div class="anime-modal-footer"><button class="anime-btn cancel" onclick="closeCourseModal()">取消</button><button class="anime-btn" style="color: #ff7675;" onclick="deleteCourse()">删除</button><button class="anime-btn confirm" onclick="saveCourse()">保存</button></div>
+                    </div>
+                </div>
+
+                <div id="ddl-confirm-modal" class="anime-modal-overlay">
+                    <div class="anime-modal-box"><div class="anime-modal-header">✨ 任务完成 ✨</div><div class="anime-modal-body" style="padding: 30px 20px;">确定搞定了吗？太棒啦！</div><div class="anime-modal-footer"><button id="ddl-cancel-btn" class="anime-btn cancel">手滑了</button><button id="ddl-confirm-btn" class="anime-btn confirm" style="color: #74b9ff;">我做完啦！</button></div></div>
                 </div>
             </main>
-
-            <div id="course-modal" class="anime-modal-overlay">
-                <div class="anime-modal-box" style="width: 350px;">
-                    <div class="anime-modal-header">✍️ 编辑课程</div>
-                    <div class="anime-modal-body" style="text-align: left;">
-                        <input type="hidden" id="course-edit-id">
-                        
-                       <label>有效周次 (例如: 1-16):</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <input type="number" id="course-start-week" min="1" max="25" class="wa-comment-input" placeholder="开始周" value="1">
-                            <span style="line-height: 30px; color: #999;">-</span>
-                            <input type="number" id="course-end-week" min="1" max="25" class="wa-comment-input" placeholder="结束周" value="16">
-                        </div>
-
-                        <label>单双周:</label>
-                        <select id="course-week-type" class="wa-comment-input" style="width: 100%; margin-bottom: 10px; background: rgba(255,255,255,0.5);">
-                            <option value="all">全周都要上</option>
-                            <option value="odd">只上单周 (1,3,5...)</option>
-                            <option value="even">只上双周 (2,4,6...)</option>
-                        </select>
-
-                        <label>星期几 (1-7):</label>
-                        <input type="number" id="course-day" min="1" max="7" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
-                        
-                        <label>开始节次 (1-12):</label>
-                        <input type="number" id="course-start" min="1" max="12" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
-                        
-                        <label>结束节次 (1-12):</label>
-                        <input type="number" id="course-end" min="1" max="12" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
-                        
-                        <label>课程名称:</label>
-                        <input type="text" id="course-name" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;" placeholder="例如: 操作系统">
-                        
-                        <label>教室/地点:</label>
-                        <input type="text" id="course-room" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;" placeholder="例如: 仙II-306">
-                    </div>
-                    <div class="anime-modal-footer">
-                        <button class="anime-btn cancel" onclick="closeCourseModal()">取消</button>
-                        <button class="anime-btn" style="color: #ff7675;" onclick="deleteCourse()">删除</button>
-                        <button class="anime-btn confirm" onclick="saveCourse()">保存</button>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <audio id="bg-music" src="" loop></audio>
-
-    <div id="web-pet" class="web-pet-container">
-        <div id="pet-dialog" class="pet-dialog">哇，你终于回来了~</div>
-        <img id="pet-img" src="pet.jpg" alt="桌宠">
-    </div>
-
-    <div id="ddl-confirm-modal" class="anime-modal-overlay">
-                <div class="anime-modal-box">
-                    <div class="anime-modal-header">✨ 任务完成 ✨</div>
-                    <div class="anime-modal-body" style="padding: 30px 20px;">
-                        确定已经搞定这个 DDL 了吗？太棒啦！(≧∇≦)ﾉ
-                    </div>
-                    <div class="anime-modal-footer">
-                        <button id="ddl-cancel-btn" class="anime-btn cancel">手滑了</button>
-                        <button id="ddl-confirm-btn" class="anime-btn confirm" style="color: #74b9ff;">我做完啦！</button>
-                    </div>
-                </div>
-            </div>
-
-            
     <div id="fps-box" class="fps-box">FPS: -- (≧∇≦)ﾉ</div>
+    <div id="global-player" class="global-player collapsed"><div class="player-toggle" id="player-toggle"><img id="player-cover" src="https://picsum.photos/100" class="record-spin"><div class="player-sleeve"><div class="record-center"></div></div><div class="toggle-arrow"><i class="fa-solid fa-chevron-right"></i></div></div><div class="player-panel"><div class="player-info"><div class="player-title" id="player-title">等待载入...</div><div class="player-artist" id="player-artist">Asuna</div><div class="player-controls"><button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button><button id="btn-play" class="play-btn-main"><i class="fa-solid fa-play"></i></button><button id="btn-next"><i class="fa-solid fa-forward-step"></i></button></div></div><ul class="playlist" id="playlist"></ul></div><audio id="bg-music"></audio></div>
+    <div id="live2d-container" class="live2d-container"><canvas id="live2d-canvas"></canvas></div>
 
+    <script src="https://unpkg.com/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+    <script src="https://unpkg.com/pixi-live2d-display@0.4.0/dist/cubism2.min.js"></script>
+    <script src="music/playlist.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
