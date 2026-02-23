@@ -6,10 +6,37 @@
     font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* ================= 全局主题色定义 ================= */
+:root {
+    /*粉色的主题*/
+    /*--theme-pink: #ffb6c1;*/    /* 猛男粉 */
+    /*--theme-blue: #87ceeb;*/    /* 清新蓝 */
+    
+    /*蓝紫的主题*/
+    --theme-blue: #74b9ff;  /* 保持明亮的蓝色 */
+    --theme-pink: #a29bfe;  /* 将原本的粉色改为这种带有紫色调的“冰凌紫”，更具冰晶感 */
+
+    --glass-bg: rgba(255, 255, 255, 0.75); /* 毛玻璃背景色 */
+    --glass-border: rgba(255, 255, 255, 0.6); /* 毛玻璃高光边框 */
+    --text-main: #555;        /* 主文字色（比纯黑更柔和） */
+    --text-light: #999;       /* 次要文字色 */
+}
+
+/* ================= 基础重置优化 ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* 使用更圆润的系统字体组合 */
+    font-family: "Nunito", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
 body {
     background-color: #f0f2f5;
-    color: #333;
-    line-height: 1.6;
+/* ...保持你原有的背景图片代码不变... */
+    /* 只修改下面这两行颜色设定 */
+    color: var(--text-main);
+    line-height: 1.7; /* 让文字行高更宽松一点，看起来更舒服 */
     /* ==== 新增：固定平铺二次元背景 ==== */
     /* 将下面单引号里的文字替换成我刚才单独发给你的那串图片链接，或者你保存在本地的图片路径 */
     background-image: url('https://i.etsystatic.com/44283612/r/il/614a7c/5187283592/il_1588xN.5187283592_afxb.jpg');
@@ -18,50 +45,73 @@ body {
     background-attachment: fixed; /* 核心：鼠标滚动网页时，背景图保持固定不动 */
 }
 
-/* ================= 整体布局 ================= */
+/* ================= 整体布局 (玻璃化) ================= */
 .page-wrapper {
-    /* 如果你需要左右两侧的二次元背景图，可以在这里设置 background-image */
     min-height: 100vh;
     padding: 40px 20px;
     display: flex;
     justify-content: center;
+    align-items: flex-start; /* 防止内容少时居中而在长页面跳动 */
 }
 
 .main-container {
     display: flex;
     width: 100%;
     max-width: 1200px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden; /* 防止内容溢出圆角 */
+    /* 【核心改动】：毛玻璃特效 */
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(120%); /* 模糊+轻微增加饱和度，更通透 */
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    border-radius: 16px; /* 更大的圆角 */
+    border: 2px solid var(--glass-border); /* 加上一道亮晶晶的白边 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5); /* 外阴影+内发光 */
+    overflow: hidden; 
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* 让整个大容器悬浮时也有一种呼吸感 */
+.main-container:hover {
+    box-shadow: 0 20px 45px rgba(0,0,0,0.12), inset 0 0 20px rgba(255,255,255,0.6);
 }
 
 /* ================= 侧边栏样式 ================= */
 .sidebar {
-    width: 260px;
-    flex-shrink: 0; /* 防止侧边栏被压缩 */
-    border-right: 1px solid #eaeaea;
+width: 260px;
+    flex-shrink: 0;
+    /* 去掉原有的实色背景和灰色边框 */
+    background-color: transparent; 
+    border-right: 2px solid var(--glass-border); /* 改用半透明分割线 */
     display: flex;
     flex-direction: column;
 }
 
 .sidebar-header {
-    background-color: #2c2c2c;
+/* 【核心修改】：紫蔷薇与冰蓝色的梦幻渐变，带有 85% 的半透明果冻感 */
+    background-image: linear-gradient(135deg, rgba(116, 185, 255, 0.85), rgba(162, 155, 254, 0.9));
     color: #ffffff;
-    padding: 30px 20px;
+    padding: 15px 20px;
     text-align: center;
+    border-bottom-right-radius: 16px;
+    /* 顺手给左上角也加个圆角，完美贴合外层大容器 */
+    border-top-left-radius: 14px; 
+    box-shadow: 0 4px 15px rgba(162, 155, 254, 0.2); /* 加一点紫色的发光阴影 */
+    margin-bottom: 15px;
 }
 
 .sidebar-header h1 {
-    font-size: 24px;
-    letter-spacing: 2px;
+    color: #ffffff;
+    font-weight: 900;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* 给大字加一层柔和的阴影 */
 }
 
 .sidebar-header p {
-    font-size: 14px;
-    color: #aaaaaa;
-    margin-top: 5px;
+color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    /* 【核心修改】：缩小副标题和主标题之间的间距 */
+    margin-top: 2px; 
+    opacity: 1 !important;
 }
 
 /* 侧边栏导航 */
@@ -99,8 +149,20 @@ body {
 
 .sidebar-menu li:hover a, 
 .sidebar-menu li.active a {
-    background-color: #f5f5f5;
-    color: #000;
+    /* 使用主题粉色作为高亮背景，并加个小圆角 */
+    background-color: var(--theme-pink);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4); /* 粉色光晕 */
+    transform: translateX(5px); /* 悬浮时微微向右弹一下 */
+}
+/* 给图标也变个色 */
+.sidebar-menu li:hover a i, 
+.sidebar-menu li.active a i {
+    color: #fff;
+}
+.sidebar-menu a {
+    /* (原有代码不变) */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* 加上 Q 弹的过渡曲线 */
 }
 
 /* 侧边栏徽章 (数字) */
@@ -120,7 +182,9 @@ body {
 .sidebar-widget {
     padding: 20px;
     text-align: center;
-    border-top: 1px solid #eaeaea;
+    /* 改用半透明分割线 */
+    border-top: 2px solid var(--glass-border);
+    background-color: rgba(255,255,255,0.2); /* 稍微加一点点底色衬托组件 */
 }
 
 .sidebar-widget img {
@@ -142,8 +206,9 @@ body {
 .content-area {
     flex-grow: 1;
     padding: 40px;
-    background-color: #fff;
-    overflow-y: auto; /* 内容过多时可滚动 */
+    /* 去掉白色背景 */
+    background-color: transparent;
+    overflow-y: auto; 
 }
 
 /* 文章头部 */
@@ -231,17 +296,46 @@ body {
 /* 2. 点击烟花爆炸粒子 */
 .firework-particle {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     pointer-events: none;
     z-index: 10000;
     /* 烟花向四周散开并消失的动画 */
-    animation: blast 0.6s ease-out forwards;
+    animation: blast 0.8s ease-out forwards;
 }
 @keyframes blast {
     0% { transform: translate(0, 0) scale(1); opacity: 1; }
     100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* 3. 点击烟花爆炸圆环 */
+.firework-ring {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+    pointer-events: none;
+    z-index: 10000;
+    /* 圆环从中心向外扩大并淡出的动画 */
+    animation: ringExpand 0.8s ease-out forwards;
+    transform: translate(-50%, -50%); /* 让圆环从中心点向外扩展 */
+}
+
+@keyframes ringExpand {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        border-width: 2px;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+        border-width: 1px;
+    }
 }
 
 /* 3. 左下角桌宠样式 */
@@ -280,3 +374,1172 @@ body {
 .pet-dialog.show {
     opacity: 1;
 }
+/* ================= WA 流水账页面样式 ================= */
+/* ================= WA 流水账页面样式 ================= */
+/* ================= WA 流水账页面样式 ================= */
+/* ================= WA 流水账页面样式 ================= */
+/* ================= WA 流水账页面样式 ================= */
+/* ================= WA 流水账页面样式 ================= */
+/* WA 页面卡片玻璃化，并加上粉色边框 */
+.wa-editor-box, .wa-post {
+    background: rgba(255, 255, 255, 0.55) !important; /* 稍微比大背景白一点，突出层次 */
+    /* ========= 【删除这一行！】 ========= */
+    /* backdrop-filter: blur(8px); */ 
+    /* ================================= */
+    border: 2px solid var(--glass-border); /* 亮晶晶边框 */
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Q弹动画 */
+}
+/* 悬浮时卡片上浮并发光 */
+.wa-editor-box:hover, .wa-post:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 12px 25px rgba(255, 182, 193, 0.25) !important; /* 粉色光晕阴影 */
+    border-color: var(--theme-pink); /* 边框变粉 */
+}
+#wa-textarea {
+    width: 100%;
+    min-height: 100px;
+    border: none;
+    resize: vertical;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    font-family: inherit;
+    margin-bottom: 10px;
+}
+
+.wa-editor-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #eaeaea;
+    padding-top: 10px;
+}
+
+.wa-tool-btn {
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+.wa-tool-btn:hover { color: #87ceeb; }
+
+.wa-meta-info {
+    font-size: 12px;
+    color: #999;
+    margin-right: 15px;
+}
+
+#wa-submit-btn {
+    background-color: #87ceeb;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+#wa-submit-btn:hover { background-color: #5bbde0; }
+
+#wa-image-preview-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+#wa-image-preview {
+    max-height: 100px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+#wa-remove-image {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* 发布的单条记录卡片 */
+.wa-post {
+    background: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.wa-post-header {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f5f5f5;
+}
+.wa-post-content {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    white-space: pre-wrap; /* 保留文本换行 */
+}
+.wa-post-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* 评论区样式 */
+.wa-comments {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+.wa-comment-item {
+    font-size: 13px;
+    border-bottom: 1px dashed #eee;
+    padding: 8px 0;
+}
+.wa-comment-item:last-child { border-bottom: none; }
+.wa-comment-time {
+    color: #aaa;
+    font-size: 11px;
+    margin-left: 10px;
+}
+.wa-comment-input-box {
+    display: flex;
+    margin-top: 10px;
+}
+.wa-comment-input {
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    outline: none;
+}
+.wa-comment-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.wa-comment-btn:hover { background: #eee; }
+/* ================= 三个点下拉菜单样式 ================= */
+.wa-more-options {
+    position: relative;
+}
+.wa-more-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+.wa-more-btn:hover {
+    background: #f0f0f0;
+    color: #87ceeb; /* 悬浮时变成清新的蓝色 */
+}
+.wa-dropdown-menu {
+    display: none; 
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 5px;
+    background: #fff;
+    border: 1px solid #ffe4e1;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    z-index: 100;
+    min-width: 120px;
+    overflow: hidden;
+}
+.wa-dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+.wa-dropdown-menu .wa-delete-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    color: #ff4757;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+.wa-dropdown-menu .wa-delete-btn:hover {
+    background: #fff0f1; /* 鼠标放上去有浅红色的底色反馈 */
+}
+
+/* ================= 二次元居中弹窗样式 ================= */
+.anime-modal-overlay {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* 半透明黑底 */
+    backdrop-filter: blur(3px); /* 弹窗时背景微微模糊 */
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+.anime-modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.2s;
+}
+.anime-modal-box {
+    background: #fff;
+    width: 320px;
+    border-radius: 16px; /* 比较圆润可爱的边缘 */
+    box-shadow: 0 10px 40px rgba(255, 182, 193, 0.4);
+    text-align: center;
+    border: 3px solid #ffe4e1; /* 萌萌的粉色边框 */
+    transform: scale(0.9);
+    /* 加入弹跳出现的动画，非常有活力 */
+    animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+    overflow: hidden;
+}
+.anime-modal-header {
+    background: #fff0f1;
+    color: #ff7675;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+.anime-modal-body {
+    padding: 30px 20px;
+    color: #555;
+    font-size: 15px;
+    line-height: 1.5;
+}
+.anime-modal-footer {
+    display: flex;
+    border-top: 1px solid #ffe4e1;
+}
+.anime-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+}
+.anime-btn.cancel {
+    border-right: 1px solid #ffe4e1;
+    color: #999;
+}
+.anime-btn.cancel:hover {
+    background: #f9f9f9;
+    color: #666;
+}
+.anime-btn.confirm {
+    color: #ff4757;
+    font-weight: bold;
+}
+.anime-btn.confirm:hover {
+    background: #ff7675;
+    color: #fff;
+}
+
+/* 动画关键帧 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes popUp {
+    to { transform: scale(1); }
+}
+/* ================= 全局滚动条美化 (二次元纤细风) ================= */
+/* ================= 全局滚动条美化 (二次元纤细风) ================= */
+/* ================= 全局滚动条美化 (二次元纤细风) ================= */
+/* ================= 全局滚动条美化 (二次元纤细风) ================= */
+/* ================= 全局滚动条美化 (二次元纤细风) ================= */
+/* 滚动条整体宽度 */
+::-webkit-scrollbar {
+    width: 8px; /* 侧边主滚动条 */
+    height: 8px; /* 横向滚动条 */
+}
+/* 滚动条轨道 (透明) */
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+/* 滚动条滑块 (猛男粉色，圆润) */
+::-webkit-scrollbar-thumb {
+    background: var(--theme-pink); 
+    background-image: linear-gradient(45deg, var(--theme-pink), var(--theme-blue)); /* 渐变色更梦幻 */
+    border-radius: 10px;
+    border: 2px solid transparent; /*通过透明边框挤压，让滑块看起来更细 */
+    background-clip: content-box;
+}
+/* 鼠标按住滚动条时 */
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--theme-blue);
+}
+
+/* ================= 右下角帧率显示 ================= */
+/* ================= 右下角帧率显示 ================= */
+/* ================= 右下角帧率显示 ================= */
+/* ================= 右下角帧率显示 ================= */
+/* ================= 右下角帧率显示 ================= */
+
+.fps-box {
+    position: fixed;
+    bottom: 15px; 
+    right: 15px;  
+    /* 【修改】：将透明度从 0.6 提高到 0.85，背景变得更白、更实一点 */
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(6px); /* 稍微增加一点模糊度，质感更好 */
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px; 
+    /* 【修改】：内边距稍微撑大一点，让框更有分量感 */
+    padding: 6px 14px; 
+    /* 【修改】：字体稍微调大，从 11px 改到 13px，清晰但又不会太大 */
+    font-size: 13px; 
+    color: var(--theme-pink); 
+    font-weight: bold;
+    font-family: 'Nunito', monospace; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 稍微加深一点点阴影，让它更有立体感 */
+    z-index: 99999;
+    pointer-events: none; 
+}
+
+/* ================= 课表与 DDL 页面样式 ================= */
+/* ================= 课表与 DDL 页面样式 ================= */
+/* ================= 课表与 DDL 页面样式 ================= */
+/* ================= 课表与 DDL 页面样式 ================= */
+/* ================= 课表与 DDL 页面样式 ================= */
+/* ================= 课表与 DDL 页面样式 ================= */
+
+.week-nav {
+    display: flex;
+    align-items: center;
+    background: var(--glass-bg);
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+}
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--theme-pink);
+    font-size: 16px;
+    padding: 5px;
+    transition: transform 0.2s;
+}
+.icon-btn:hover { transform: scale(1.2); }
+
+/* 课表网格系统 */
+.schedule-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 30px;
+    overflow-x: auto; /* 屏幕太小时允许横向滚动 */
+}
+
+.schedule-grid {
+    display: grid;
+    /* 1列时间轴(50px) + 7列星期(等宽) */
+    grid-template-columns: 65px repeat(7, 1fr);
+    /* 1行表头(40px) + 12行节次(60px) */
+    grid-template-rows: 40px repeat(12, 60px);
+    gap: 2px;
+    min-width: 600px;
+    position: relative;
+}
+
+/* 单元格基础样式 */
+.grid-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-light);
+    border-bottom: 1px dashed rgba(0,0,0,0.05);
+    border-right: 1px dashed rgba(0,0,0,0.05);
+}
+.grid-header {
+    font-weight: bold;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--glass-border);
+}
+.time-col {
+    flex-direction: column;
+    font-size: 11px;
+}
+
+/* 课程卡片 */
+.course-card {
+    border-radius: 6px;
+    padding: 5px;
+    font-size: 12px;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    margin: 2px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.course-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+.course-name { font-weight: bold; margin-bottom: 4px; }
+.course-room { font-size: 11px; opacity: 0.8; }
+
+/* DDL 区域样式 */
+.ddl-section {
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+}
+.ddl-input-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+#ddl-task-input { flex-grow: 1; }
+#ddl-task-input, #ddl-date-input {
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.5);
+    outline: none;
+    font-family: inherit;
+}
+
+.ddl-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.6);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--theme-blue);
+    transition: transform 0.2s;
+}
+.ddl-item:hover { transform: translateX(5px); }
+.ddl-task { font-weight: bold; color: var(--text-main); }
+.ddl-date { font-size: 12px; color: var(--text-light); margin-left: 10px;}
+.ddl-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+/* DDL 紧急程度颜色 */
+.badge-urgent { background-color: #ff7675; } /* 小于3天 */
+.badge-warning { background-color: #fdcb6e; } /* 小于7天 */
+.badge-safe { background-color: #74b9ff; }   /* 7天以上 */
+
+/* ================= 备忘录 (Remind) 页面样式 ================= */
+/* ================= 备忘录 (Remind) 页面样式 ================= */
+/* ================= 备忘录 (Remind) 页面样式 ================= */
+/* ================= 备忘录 (Remind) 页面样式 ================= */
+/* ================= 备忘录 (Remind) 页面样式 ================= */
+.remind-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* 左侧控制台 */
+.remind-left-panel {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.anime-poster {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.anime-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.poster-mask {
+    position: absolute;
+    bottom: 0; width: 100%;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    padding: 15px 10px 10px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+#remind-text {
+    width: 100%;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 15px;
+}
+
+/* 右侧时光卡片区 */
+.remind-right-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.remind-card {
+    position: relative;
+    display: flex;
+    background: rgba(255, 255, 255, 0.65);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    transition: transform 0.3s;
+}
+.remind-card:hover {
+    transform: translateY(-5px);
+}
+
+.remind-card-img {
+    width: 180px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-right: 2px solid var(--glass-border);
+}
+
+.remind-card-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.remind-card-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    padding-right: 30px; /* 给右上角的删除按钮留空间 */
+}
+
+/* 酷炫的大倒计时数字块 */
+.countdown-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.time-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--theme-pink);
+    border-radius: 10px;
+    padding: 10px 15px;
+    min-width: 60px;
+    box-shadow: inset 0 0 10px rgba(255, 182, 193, 0.2);
+}
+.time-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--theme-pink);
+    line-height: 1;
+    font-family: 'Nunito', monospace;
+}
+.time-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 5px;
+}
+.time-finished {
+    font-size: 24px;
+    font-weight: bold;
+    color: #74b9ff;
+    padding: 10px;
+    background: rgba(116, 185, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* ================= 留言板 (left.html) 专属样式 ================= */
+/* ================= 留言板 (left.html) 专属样式 ================= */
+/* ================= 留言板 (left.html) 专属样式 ================= */
+/* ================= 留言板 (left.html) 专属样式 ================= */
+/* ================= 留言板 (left.html) 专属样式 ================= */
+
+.message-intro {
+    background: rgba(255, 255, 255, 0.4);
+    border-left: 5px solid var(--theme-blue);
+    padding: 20px;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 30px;
+    line-height: 1.8;
+    font-size: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.comment-form-box {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px dashed var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.3s;
+}
+.comment-form-box:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.comment-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.comment-inputs input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.6);
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+.comment-inputs input:focus, #comment-text:focus {
+    border-color: var(--theme-blue);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.2);
+}
+
+#comment-text {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.6);
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+/* 留言列表项 */
+.comment-item {
+    display: flex;
+    gap: 20px;
+    padding: 25px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.08);
+    transition: background 0.3s;
+}
+.comment-item:last-child {
+    border-bottom: none;
+}
+.comment-item:hover {
+    background: rgba(255,255,255,0.4);
+    border-radius: 12px;
+    padding: 25px 15px;
+    margin: 0 -15px;
+}
+
+.comment-avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+.comment-item:hover .comment-avatar img {
+    transform: rotate(360deg); /* 鼠标放上去头像会转圈圈！ */
+}
+
+.comment-body {
+    flex: 1;
+}
+.comment-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.comment-author {
+    font-weight: bold;
+    color: #555;
+    font-size: 15px;
+}
+/* 浏览器和系统的小尾巴标签 */
+.comment-os {
+    font-size: 11px;
+    color: var(--text-light);
+    background: rgba(0,0,0,0.04);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+.comment-date {
+    font-size: 12px;
+    color: #aaa;
+    width: 100%;
+    margin-top: -5px;
+}
+
+.comment-content {
+    font-size: 14px;
+    color: var(--text-main);
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.comment-reply-btn {
+    color: #ff7675;
+    cursor: pointer;
+    font-size: 13px;
+    float: right;
+    background: none;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.comment-item:hover .comment-reply-btn {
+    opacity: 1;
+}
+.comment-reply-btn:hover {
+    transform: scale(1.1);
+}
+/* ================= 留言板回复区域样式 ================= */
+.comment-replies {
+    margin-top: 15px;
+    padding-left: 15px;
+    border-left: 3px solid rgba(135, 206, 235, 0.3); /* 浅蓝色的引用线 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reply-item {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    position: relative;
+}
+
+.reply-author {
+    font-weight: bold;
+    color: var(--theme-blue);
+    margin-right: 5px;
+}
+
+/* 隐藏的回复输入框，点击回复后展开 */
+.reply-input-box {
+    display: none; 
+    margin-top: 15px;
+    gap: 10px;
+    animation: fadeIn 0.3s;
+}
+.reply-input-box.show {
+    display: flex;
+}
+.reply-input-box input {
+    flex-grow: 1;
+    border: 1px dashed var(--glass-border);
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    padding: 6px 12px;
+    outline: none;
+}
+
+/* ================= 关于页面 (about.html) 专属样式 ================= */
+.about-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    color: var(--text-main);
+}
+
+.about-section li {
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+.contact-list a {
+    color: var(--text-main);
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-left: 5px;
+}
+
+.contact-list a:hover {
+    color: var(--theme-pink);
+}
+
+.contact-list i {
+    font-size: 12px;
+    color: #ccc;
+    margin-left: 3px;
+    transition: color 0.2s;
+}
+
+.contact-list a:hover i {
+    color: var(--theme-pink);
+}
+
+/* ================= 侧边栏重构：独立卡片化与紧凑化 ================= */
+
+/* 第二块：开发者名片区（变成独立卡片） */
+.developer-profile {
+    /* 【修改】：大幅减小内边距，让内容更紧凑 */
+    padding: 15px; 
+    text-align: center;
+    /* 【修改】：去掉单线边框，改为完整的圆角卡片 */
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.3); 
+    /* 【修改】：左右往里缩一点点，底部留出明显间隔 */
+    margin: 5px 12px 15px 12px; 
+}
+.profile-avatar {
+    /* 【修改】：头像缩小一点，适配紧凑的布局 */
+    width: 85px; 
+    height: 85px;
+    object-fit: cover;
+    border-radius: 12px; 
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    /* 【修改】：减小头像下方的留白 */
+    margin-bottom: 8px; 
+    transition: transform 0.3s;
+}
+.profile-avatar:hover {
+    transform: scale(1.05) rotate(3deg);
+}
+.profile-name {
+    /* 【修改】：名字字号稍微收敛一点 */
+    font-size: 16px; 
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+.profile-signature {
+    font-size: 12px;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* 第三块：有趣的传送门区（变成独立卡片） */
+.sidebar-links-section {
+    /* 【修改】：减小内边距 */
+    padding: 15px; 
+    /* 【修改】：改为完整的圆角卡片 */
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    /* 【修改】：和名片一样左右缩进，底部留出空间 */
+    margin: 0 12px 15px 12px; 
+}
+.links-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--theme-pink);
+    /* 【修改】：减小标题和下方列表的间距 */
+    margin-bottom: 12px; 
+    letter-spacing: 1px;
+}
+.sidebar-links-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    /* 【修改】：减小链接之间的垂直间距 */
+    gap: 8px; 
+}
+.sidebar-links-list li {
+    text-align: center;
+}
+.sidebar-links-list a {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--text-main);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px dashed rgba(0,0,0,0.15); 
+    transition: all 0.3s;
+}
+.sidebar-links-list a:hover {
+    color: var(--theme-blue);
+    border-bottom-color: var(--theme-blue); 
+    transform: translateY(-2px); 
+}
+
+/* ================= 侧边栏终极重构：完全断开的独立悬浮卡片 ================= */
+
+/* 1. 抽去原有的长条大背景，让缝隙彻底透明 */
+.sidebar {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 这就是三个模块之间露出的“原画背景”缝隙大小，你可以改成 15px 会更紧凑 */
+    height: max-content; /* 让它紧紧贴合内容，不要出现底部无用留白 */
+}
+
+/* 2. 赋予三个独立模块统一的毛玻璃卡片样式 */
+.sidebar-block {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden; /* 让顶部招牌的颜色不溢出圆角 */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* 3. 修复顶部紫蔷薇招牌的边距 */
+.sidebar-header {
+    border-radius: 0; /* 贴满卡片顶部 */
+    margin-bottom: 0; /* 去除多余间距 */
+    padding: 20px 15px;
+}
+
+/* 4. 名片模块紧凑化 */
+.developer-profile {
+    padding: 20px 15px;
+    text-align: center;
+}
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+.profile-avatar:hover { transform: scale(1.05) rotate(3deg); }
+.profile-name {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+.profile-signature { font-size: 12px; color: var(--text-light); font-style: italic; }
+
+/* 5. 传送门模块紧凑化 */
+.sidebar-links-section {
+    padding: 20px 15px;
+}
+.links-title {
+    text-align: center; font-size: 13px; font-weight: bold;
+    color: var(--theme-pink); margin-bottom: 15px;
+}
+.sidebar-links-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.sidebar-links-list li { text-align: center; }
+.sidebar-links-list a {
+    font-size: 12px; color: var(--text-main); text-decoration: none;
+    padding-bottom: 2px; border-bottom: 1px dashed rgba(0,0,0,0.15); transition: all 0.3s;
+}
+.sidebar-links-list a:hover { color: var(--theme-blue); border-bottom-color: var(--theme-blue); }
+
+/* ================= 模块九：全局抽屉式音乐播放器 (重构版) ================= */
+.global-player {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end; 
+}
+
+/* --- 1. 左侧：全透明亚克力质感外方内圆唱片机 --- */
+.player-toggle {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    /* 去掉原本的底色和阴影，只保留唱片机本体的悬浮感 */
+    background: transparent;
+    z-index: 2; 
+    flex-shrink: 0;
+}
+
+/* 旋转的唱片封面本身保持不变 */
+#player-cover {
+    position: absolute;
+    width: 76px;
+    height: 76px;
+    top: 7px;
+    left: 7px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #222;
+    animation: spin 10s linear infinite;
+    animation-play-state: paused; 
+}
+#player-cover.playing { animation-play-state: running; }
+
+/* 神奇的镂空磨砂外壳 */
+/* 核心修改：去掉 radial-gradient 磨砂白，变成完全透明的塑料感外壳 */
+.player-sleeve {
+    position: absolute;
+    inset: 0;
+    background: transparent;      /* 完全透明 */
+    backdrop-filter: none;        /* 移除毛玻璃特效 */
+    border: 2px solid rgba(255, 255, 255, 0.4); /* 微微泛白的透明亚克力边框 */
+    border-radius: 12px;
+    box-sizing: border-box;
+    pointer-events: none; 
+}
+
+/* 唱片中心的白色小轴孔保持不变 */
+.record-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 14px; height: 14px; background: #fdfdfd; border: 1px solid #ccc;
+    border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2) inset;
+}
+
+/* 侧边箭头放大 */
+.toggle-arrow {
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--theme-blue);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* --- 2. 右侧：超大屏拉出控制面板 --- */
+.player-panel {
+    background: rgba(255, 255, 255, 0.85); /* 稍微加深一点点底色，保护超大面板的文字阅读性 */
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 0 16px 16px 0;
+    
+    /* 【核心放大】：巨幅加宽加高 */
+    width: 450px;         /* 宽度暴增，歌名再长也能显示全 */
+    height: 70vh;         /* 高度变为屏幕高度的 70% */
+    max-height: 800px;    /* 设定一个极限最大高度 */
+    padding: 25px;        /* 内边距也变得更宽裕 */
+    
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-110%);
+    opacity: 0;
+    margin-left: -20px; 
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 1;
+    pointer-events: none;
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.1); /* 加大阴影，更有悬浮层级感 */
+}
+
+.global-player.expanded .player-panel { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.global-player.expanded .toggle-arrow { transform: translateY(-50%) rotate(180deg); }
+
+/* --- 3. 内部字体同步放大 --- */
+.player-info {
+    border-bottom: 2px dashed rgba(0,0,0,0.1);
+    padding-bottom: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+.player-title { font-weight: 900; font-size: 22px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px;}
+.player-artist { font-size: 14px; color: var(--theme-pink); margin-bottom: 20px; font-weight: bold;}
+
+.player-controls { display: flex; justify-content: center; gap: 35px; align-items: center;}
+.player-controls button { background: none; border: none; color: var(--theme-blue); font-size: 20px; cursor: pointer; transition: all 0.2s; }
+.player-controls button.play-btn-main { font-size: 32px; color: var(--theme-pink); }
+.player-controls button:hover { transform: scale(1.15); }
+
+/* --- 4. 歌单列表行距拉开 --- */
+.playlist { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; padding-right: 8px; }
+.playlist li {
+    font-size: 15px;      /* 字号变大 */
+    padding: 12px 16px;   /* 点击热区变大 */
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: all 0.2s;
+    display: flex; justify-content: space-between; align-items: center; 
+    color: var(--text-main); margin-bottom: 6px;
+}
+.playlist li:hover { background: rgba(255,255,255,0.7); transform: translateX(5px); }
+.playlist li.active { background: var(--theme-pink); color: white; box-shadow: 0 4px 12px rgba(162, 155, 254, 0.4); }
+
+.playlist li span:first-child { font-weight: bold; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 20px;}
+.playlist li span:last-child { font-size: 13px; opacity: 0.8; white-space: nowrap; }
+/* 滚动条美化 */
+.playlist::-webkit-scrollbar { width: 6px; }
+.playlist::-webkit-scrollbar-thumb { background: rgba(116, 185, 255, 0.6); border-radius: 3px; }
