@@ -86,6 +86,59 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+    // ================= 模块十一：Link Start 昼夜交替系统 =================
+    const darkModeBtn = document.getElementById('dark-mode-btn');
+    const linkStartAudio = document.getElementById('link-start-audio');
+    
+    // 1. 读取本地记忆：看看用户上次离开时是不是在“暗黑潜行状态”
+    const isDarkMode = localStorage.getItem('sao_dark_mode') === 'true';
+
+    // 如果上次是黑夜，网页刚加载时直接切成黑夜
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        if (darkModeBtn) darkModeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> System Log Out';
+    }
+
+    if (darkModeBtn) {
+        darkModeBtn.addEventListener('click', () => {
+            const body = document.body;
+            // 切换 body 上的 dark-mode 类名
+            body.classList.toggle('dark-mode');
+            const currentlyDark = body.classList.contains('dark-mode');
+            
+            // 2. 播放中二的科技提示音效
+            if (linkStartAudio) {
+                linkStartAudio.currentTime = 0; // 进度归零
+                linkStartAudio.play().catch(e => console.log('浏览器可能限制了自动播放音效'));
+            }
+
+            // 3. 更改按钮文字，并把状态保存到浏览器的本地记忆中
+            if (currentlyDark) {
+                darkModeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> System Log Out';
+                localStorage.setItem('sao_dark_mode', 'true');
+            } else {
+                darkModeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Link Start';
+                localStorage.setItem('sao_dark_mode', 'false');
+            }
+
+            // 4. 【极度高能】：与亚丝娜联动！
+            const dialogBox = document.getElementById('live2d-dialog');
+            if (dialogBox) {
+                // 根据不同模式，亚丝娜说不同的话
+                dialogBox.innerHTML = currentlyDark 
+                    ? "✨ Link Start！已接入暗黑网络，潜行请注意安全哦~" 
+                    : "☀️ Log Out！欢迎回到现实世界，今天辛苦啦！";
+                
+                // 用代码魔法强制重新触发气泡的 CSS 动画
+                dialogBox.classList.remove('show');
+                void dialogBox.offsetWidth; 
+                dialogBox.classList.add('show');
+                
+                // 4.5秒后自动关掉气泡
+                setTimeout(() => { dialogBox.classList.remove('show'); }, 4500);
+            }
+        });
+    }
     const globalPlayer = document.getElementById('global-player');
     if (globalPlayer) {
         const playerToggle = document.getElementById('player-toggle');
