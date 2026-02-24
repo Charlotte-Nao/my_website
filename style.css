@@ -279,7 +279,7 @@ color: #ffffff;
 
 /* 1. 鼠标光彩拖尾 */
 .mouse-trail {
-    position: absolute;
+    position: fixed;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -295,7 +295,7 @@ color: #ffffff;
 
 /* 2. 点击烟花爆炸粒子 */
 .firework-particle {
-    position: absolute;
+    position: fixed;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -311,7 +311,7 @@ color: #ffffff;
 
 /* 3. 点击烟花爆炸圆环 */
 .firework-ring {
-    position: absolute;
+    position: fixed;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -706,8 +706,8 @@ color: #ffffff;
 
 .fps-box {
     position: fixed;
-    bottom: 15px; 
-    right: 15px;  
+    bottom: 10px; 
+    left: 15px;  
     /* 【修改】：将透明度从 0.6 提高到 0.85，背景变得更白、更实一点 */
     background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px); /* 稍微增加一点模糊度，质感更好 */
@@ -1406,7 +1406,7 @@ color: #ffffff;
 .global-player {
     position: fixed;
     left: 20px;
-    bottom: 20px;
+    bottom: 50px;
     z-index: 1000;
     display: flex;
     align-items: flex-end; 
@@ -1543,3 +1543,474 @@ color: #ffffff;
 /* 滚动条美化 */
 .playlist::-webkit-scrollbar { width: 6px; }
 .playlist::-webkit-scrollbar-thumb { background: rgba(116, 185, 255, 0.6); border-radius: 3px; }
+
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+/* ================= 模块十：Live2D 看板娘 ================= */
+.live2d-container {
+    position: fixed;
+    /*调整position距离右/下多少像素*/
+    right: -60px;
+    bottom: 0px; 
+    
+    /* 【在这里自由调整培养舱的实际大小】 */
+    width: 500px;   /* 可以改宽一点 */
+    height: 500px;  /* 亚丝娜比较高挑，可以改高一点 */
+    
+    z-index: 999;
+    pointer-events: none; 
+}
+
+#live2d-canvas {
+    width: 100%;
+    height: auto;
+    pointer-events: auto; 
+    cursor: pointer;
+}
+
+/* ================= 亚丝娜专属：对话气泡 ================= */
+.live2d-dialog {
+    position: absolute;
+    /* 气泡的垂直位置：如果你觉得气泡挡住了她的脸，就把 -30px 改小（比如 -50px 往上挪） */
+    top: 30px; 
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* 气泡外观设计 */
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--theme-pink, #ffb6c1); /* 用粉色描边 */
+    border-radius: 12px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.5;
+    white-space: pre-wrap; /* 允许换行 */
+    
+    /* 动画与交互属性 */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none; /* 极其重要：防止气泡挡住你的鼠标点击 */
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (大尺寸灵动版) ================= */
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (加大超宽版) ================= */
+/* ================= 亚丝娜专属：SAO经典 UI 气泡 (加大超宽版) ================= */
+.live2d-dialog {
+    position: absolute;
+    /* 【位置上调】：从 5px 改成了 -15px，气泡会整体往上移 20 像素 */
+    /* 如果你觉得还不够高，可以继续改成 -25px 或者 -30px */
+    top: -15px; 
+    left: 50%;
+    
+    min-width: 260px; 
+    max-width: 320px; 
+    padding: 16px 28px; 
+    
+    background: rgba(250, 250, 250, 0.95);
+    border: 2px solid #ff9900; 
+    border-radius: 8px; 
+    
+    font-size: 15px; 
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); 
+    
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; 
+    z-index: 1000;
+    
+    transform: translateX(-50%);
+    transition: opacity 0.3s ease;
+}
+
+/* (保留你之前的 .live2d-dialog.show, @keyframes 和 ::after/before 代码，不要删) */
+
+/* 灵动呼吸动画 */
+.live2d-dialog.show {
+    opacity: 1;
+    visibility: visible;
+    animation: irregularFloat 4s ease-in-out infinite;
+}
+
+/* 不规则漂浮关键帧 */
+@keyframes irregularFloat {
+    0%   { transform: translateX(-50%) translate(0px, 0px) rotate(0deg); }
+    20%  { transform: translateX(-50%) translate(-4px, -6px) rotate(-1.5deg); }
+    40%  { transform: translateX(-50%) translate(3px, -10px) rotate(1deg); }
+    60%  { transform: translateX(-50%) translate(5px, -3px) rotate(2deg); }
+    80%  { transform: translateX(-50%) translate(-2px, 4px) rotate(-1deg); }
+    100% { transform: translateX(-50%) translate(0px, 0px) rotate(0deg); }
+}
+
+/* 【尾巴颜色同步回归：橙色边框 + 白色填充】 */
+.live2d-dialog::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 12px 10px 0;
+    border-style: solid;
+    border-color: #ff9900 transparent transparent transparent; /* 经典橙 */
+}
+.live2d-dialog::before {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 8px 0;
+    border-style: solid;
+    border-color: rgba(250, 250, 250, 0.95) transparent transparent transparent; /* 经典白 */
+    z-index: 1;
+}
+
+/* ================= 终极防御：打破物理结界 ================= */
+
+/* 1. 把侧边栏的层级拉到极限，无视一切遮挡！ */
+.sidebar {
+    position: relative !important;
+    z-index: 999999 !important; 
+}
+
+/* 2. 剥夺真凶（播放器外壳、亚丝娜外壳）的物理碰撞体积 */
+#global-player, #live2d-container {
+    pointer-events: none !important; 
+}
+
+/* 3. 单独给里面的按钮和亚丝娜身体恢复碰撞，保证能点歌、能摸头 */
+#player-toggle, .player-panel, #live2d-canvas {
+    pointer-events: auto !important; 
+}
+
+/* ================================================================= */
+/* ================= 视觉升级：Link Start 昼夜交替 ================= */
+/* ================================================================= */
+
+/* 1. 给全局元素加上颜色过渡动画，让变黑/变白的过程像呼吸一样丝滑（0.5秒） */
+/* 让几乎所有元素在切换昼夜时，都拥有丝滑的渐变过渡 */
+body, .sidebar, .content-area, .glass-card, .wa-post, .comment-item, .sidebar-block, 
+h1, h2, h3, p, span, a, input, textarea, select, button, .wa-editor-box, .anime-modal-box {
+    transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease !important;
+}
+
+/* 2. 暗黑模式下的专属全局变量与背景覆盖 */
+body.dark-mode {
+    /* 【100%稳定】：用高级的午夜蓝紫渐变作为底色，绝对不消失 */
+    background: radial-gradient(circle at top right, #1a2035 0%, #0a0c15 100%) fixed;
+    
+    /* （可选）如果你自己下载了一张好看的夜景图放在文件夹里，可以把下面这行的注释取消掉： */
+     background: url('sky.png') no-repeat center center fixed; background-size: cover; 
+    
+    /* 将明亮的毛玻璃变暗，降低透明度，增加科技感 */
+    --glass-bg: rgba(20, 25, 35, 0.85); 
+    --glass-border: rgba(100, 150, 255, 0.2); 
+    
+    /* 文字颜色变亮灰，防止在黑背景下刺眼 */
+    --text-main: #dcdcdc;  
+    --text-light: #888;
+    
+    /* 蓝紫主题在暗色下需要稍微提亮和偏霓虹一点 */
+    --theme-blue: #82b1ff; 
+    --theme-pink: #b39ddb; 
+
+    
+}
+
+/* 3. 侧边栏在暗黑模式下的特殊处理（加深背景色） */
+body.dark-mode .sidebar {
+    background: linear-gradient(135deg, rgba(15, 20, 35, 0.9) 0%, rgba(25, 30, 50, 0.95) 100%);
+    border-right: 1px solid rgba(100, 150, 255, 0.2);
+}
+
+/* 4. Link Start 切换按钮的专属样式 */
+.dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--theme-blue);
+    color: var(--theme-blue);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-top: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer; /* 鼠标放上去变小手 */
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 按钮悬停时的发光效果 */
+.dark-mode-toggle:hover {
+    background: var(--theme-blue);
+    color: #fff;
+    box-shadow: 0 0 10px var(--theme-blue);
+}
+
+/* ================= 暗黑模式下：全面黑化各种白底控件 ================= */
+
+/* 1. 把所有输入框、文本区变成半透明黑底 + 亮灰字 + 幽蓝边框 */
+body.dark-mode input, 
+body.dark-mode textarea, 
+body.dark-mode select {
+    background-color: rgba(10, 15, 25, 0.6) !important; 
+    color: #dcdcdc !important; 
+    border: 1px solid rgba(100, 150, 255, 0.4) !important;
+}
+
+/* 调整输入框里“占位提示文字”的颜色，别让它太亮 */
+body.dark-mode input::placeholder, 
+body.dark-mode textarea::placeholder {
+    color: #777 !important;
+}
+
+/* 2. 修复各种原本带有大白底的包裹框（如 WA编辑器、留言板表单、备忘录输入框、二次元弹窗） */
+body.dark-mode .wa-editor-box,
+body.dark-mode .comment-form-box,
+body.dark-mode .remind-input-box,
+body.dark-mode .anime-modal-box {
+    background: rgba(20, 25, 35, 0.85) !important; 
+    border-color: rgba(100, 150, 255, 0.2) !important;
+    color: #dcdcdc;
+}
+
+/* 3. 修复点击“三个点”弹出的下拉菜单 */
+body.dark-mode .wa-dropdown-menu {
+    background: rgba(15, 20, 30, 0.95) !important;
+    border: 1px solid rgba(100, 150, 255, 0.3) !important;
+}
+
+/* 下拉菜单里的按钮文字变亮，悬停时底色变亮 */
+body.dark-mode .wa-dropdown-menu button {
+    color: #dcdcdc !important;
+}
+body.dark-mode .wa-dropdown-menu button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+/* ================= 暗黑模式：消灭所有残余的白框和浅色卡片 ================= */
+
+/* 1. 修复 WA 页面：流水账帖子卡片 */
+body.dark-mode .wa-post {
+    background: rgba(20, 25, 35, 0.85) !important;
+    border-color: rgba(100, 150, 255, 0.2) !important;
+}
+
+/* 2. 修复 WA 页面：就是你说的那个“评论区周围的一圈白框” */
+body.dark-mode .wa-comments {
+    background: rgba(10, 15, 25, 0.5) !important; /* 变成深邃的暗黑色 */
+    border: 1px solid rgba(100, 150, 255, 0.1) !important;
+}
+
+/* 评论区底下每条评论的分割线变暗 */
+body.dark-mode .wa-comment-item {
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 3. 修复 备忘录页面：备忘卡片 */
+body.dark-mode .remind-card {
+    background: rgba(20, 25, 35, 0.85) !important;
+    border-color: rgba(100, 150, 255, 0.2) !important;
+}
+
+/* 4. 修复 留言板页面：别人留下的评论卡片 */
+body.dark-mode .comment-item {
+    background: rgba(20, 25, 35, 0.85) !important;
+    border-color: rgba(100, 150, 255, 0.2) !important;
+}
+
+/* 5. 修复 课表页面：DDL 列表和课程表格子线条 */
+body.dark-mode .ddl-item {
+    background: rgba(20, 25, 35, 0.85) !important;
+    color: #dcdcdc !important;
+}
+body.dark-mode .grid-cell {
+    border-color: rgba(255, 255, 255, 0.1) !important; /* 网格线变暗 */
+}
+body.dark-mode .grid-header {
+    background: rgba(255, 255, 255, 0.05) !important; /* 表头背景变暗 */
+}
+/* ================= 暗黑模式：深色幽蓝按钮专项优化 ================= */
+
+/* 1. WA页面：【发布记录】 按钮 (褪去天蓝，换上深邃海军蓝) */
+body.dark-mode #wa-submit-btn {
+    background: rgba(40, 60, 100, 0.8) !important; 
+    color: #dcdcdc !important;
+    border: 1px solid rgba(100, 150, 255, 0.4) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+body.dark-mode #wa-submit-btn:hover {
+    background: rgba(60, 90, 140, 0.9) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(100, 150, 255, 0.5) !important;
+}
+
+/* 2. WA页面：评论区的 【提交】 按钮 */
+body.dark-mode .wa-comment-btn {
+    background: rgba(30, 45, 75, 0.6) !important; 
+    color: #82b1ff !important;
+    border: 1px solid rgba(100, 150, 255, 0.3) !important;
+}
+body.dark-mode .wa-comment-btn:hover {
+    background: rgba(50, 75, 115, 0.9) !important;
+    color: #fff !important;
+}
+
+/* 3. 通用动漫按钮：【传图】、【手滑了（取消）】等辅助按钮 */
+body.dark-mode .anime-btn {
+    background: rgba(30, 45, 75, 0.6) !important; 
+    color: #82b1ff !important;
+    border: 1px solid rgba(100, 150, 255, 0.3) !important;
+}
+body.dark-mode .anime-btn:hover {
+    background: rgba(50, 75, 115, 0.9) !important;
+    color: #fff !important;
+}
+
+/* 4. 通用确认按钮：【记下来】、【添加 DDL】、【提交留言】等主操作按钮 */
+body.dark-mode .anime-btn.confirm {
+    background: rgba(40, 60, 100, 0.8) !important; 
+    color: #dcdcdc !important;
+    border: 1px solid rgba(100, 150, 255, 0.4) !important;
+}
+body.dark-mode .anime-btn.confirm:hover {
+    background: rgba(60, 90, 140, 0.9) !important;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(100, 150, 255, 0.4) !important;
+}
+/* ================================================================= */
+/* ================= 细节打磨：丝滑动效与高级感排版 ================= */
+/* ================================================================= */
+
+/* 1. 修复悬停突兀：把 transform (放大/位移) 加入丝滑套餐，时间设为 0.4秒 */
+.wa-post, 
+.comment-item, 
+.remind-card {
+    /* 使用 all 让所有的变化（包括放大和阴影）都拥有 0.4秒 的高级缓动效果 */
+    transition: all 0.4s ease !important;
+}
+
+/* 2. 拯救留言板的“方形毛坯房”与“极度拥挤” */
+.comment-item {
+    border-radius: 16px !important;    /* 强制变成极其温柔的大圆角 */
+    margin-bottom: 25px !important;    /* 拉开不同留言之间的上下距离，拒绝拥挤 */
+    padding: 20px !important;          /* 增加内部留白，让文字和边缘有呼吸感 */
+    overflow: hidden;                  /* 防止内部元素溢出破坏圆角 */
+}
+
+/* 3. 给留言板的“楼中楼（回复区）”加上清晰的分界线 */
+.comment-replies {
+    margin-top: 15px !important;
+    padding-top: 15px !important;
+    border-top: 1px dashed rgba(150, 150, 150, 0.3) !important; /* 加一条高级的半透明虚线 */
+}
+
+/* 4. 优化 WA 页面底下的评论区（同样需要圆角和间距） */
+.wa-comments {
+    border-radius: 16px !important;    /* 评论大外壳变大圆角 */
+    padding: 15px !important;
+    margin-top: 20px !important;
+}
+.wa-comment-item {
+    border-radius: 10px !important;    /* 每条单聊小圆角 */
+    margin-bottom: 12px !important;    /* 小评论之间也留出缝隙 */
+    padding: 10px 15px !important;
+}
+/* ================================================================= */
+/* ================= 备忘录页面：传图与记下来按钮微调 ================= */
+/* ================================================================= */
+
+/* 1. 精准调整【传图】按钮（通过 label 的 for 属性来精确锁定它） */
+label[for="remind-file-input"] {
+    margin-right: 20px !important;  /* 【调间距】：用力把右边的元素推开 20px，拒绝拥挤！ */
+    padding: 8px 20px !important;   /* 【调大小】：内部上下撑开 8px，左右撑开 20px */
+    font-size: 14px !important;     /* 【调字号】：字体大小 */
+    display: inline-block;          /* 必须加这个，否则 padding 和 margin 可能不生效 */
+    border-radius: 8px;             /* 给点小圆角，看着更舒服 */
+}
+
+/* 2. 精准调整【记下来】按钮 */
+#remind-submit-btn {
+    padding: 8px 28px !important;   /* 主操作按钮，左右稍微给宽一点（28px），显得更大气稳重 */
+    font-size: 14px !important;     /* 字体大小 */
+    font-weight: bold !important;   /* 字体加粗，强调这是提交动作 */
+    border-radius: 8px;             /* 同样的小圆角 */
+    cursor: pointer;
+}
+/* ================================================================= */
+/* ================= 课表编辑弹窗：消灭粉色与原生白箭头 ================= */
+/* ================================================================= */
+
+/* 1. 终极魔法：强制浏览器把输入框原生的小箭头、下拉三角切换成【暗黑版】！ */
+body.dark-mode input, 
+body.dark-mode select, 
+body.dark-mode textarea {
+    color-scheme: dark !important; 
+}
+
+/* （备用杀招）如果某些旧浏览器箭头还不黑，用滤镜强制反色 */
+body.dark-mode input[type="number"]::-webkit-inner-spin-button,
+body.dark-mode input[type="number"]::-webkit-outer-spin-button {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2); 
+}
+
+/* 2. 精准击杀课表弹窗头部的“猛男粉”区域 */
+body.dark-mode #course-modal .anime-modal-header,
+body.dark-mode #course-modal .modal-header,
+body.dark-mode #course-modal-title {
+    background: rgba(20, 30, 50, 0.9) !important; /* 换成深邃的海军蓝背景 */
+    color: #82b1ff !important; /* 文字换成发光的科技蓝 */
+    border-bottom: 1px solid rgba(100, 150, 255, 0.3) !important;
+}
+
+/* 如果标题框有粉色阴影，一并干掉 */
+body.dark-mode #course-modal .anime-modal-box {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+}
+/* ================================================================= */
+/* ================= 课表弹窗：白箭头与掉帧终极修复 ================= */
+/* ================================================================= */
+
+/* 1. 彻底黑化原生数字输入框的上下小箭头 */
+body.dark-mode #course-modal input::-webkit-inner-spin-button,
+body.dark-mode #course-modal input::-webkit-outer-spin-button {
+    /* 强制把白底黑箭头，反转成黑底白箭头，并稍微压暗 */
+    filter: invert(100%) brightness(0.8) !important; 
+}
+
+/* 2. 拯救被吞噬的帧率 (FPS 优化) */
+/* 强行关掉弹窗外层遮罩的“实时背景模糊”，改用高级的纯色半透明黑底 */
+#course-modal, 
+.anime-modal-overlay {
+    backdrop-filter: none !important; 
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.7) !important; /* 70% 不透明度的纯黑，无性能损耗 */
+}
+
+/* 顺便修复一下弹窗内部可能引发重绘卡顿的过渡效果 */
+#course-modal .anime-modal-box {
+    will-change: transform, opacity; /* 告诉显卡把这个盒子单独拿出来渲染，不要影响别人 */
+}
+
+/* ================================================================= */
+/* ================= 全局设定：彻底抹杀所有原生数字输入框小箭头 ================= */
+/* ================================================================= */
+
+/* 针对 Chrome、Edge、Safari：不管黑夜白天，强制隐藏上下箭头 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important; 
+    margin: 0 !important; 
+}
+
