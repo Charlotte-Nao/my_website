@@ -52,6 +52,15 @@
                     <div id="wa-image-preview-container" style="display: none;">
                         <img id="wa-image-preview" src="" alt="预览图"><button id="wa-remove-image"><i class="fa-solid fa-xmark"></i></button>
                     </div>
+                    
+                    <div id="wa-sync-gallery-wrapper" style="display: none; margin-bottom: 15px; padding-top: 10px; border-top: 1px dashed var(--glass-border);">
+                        <label style="color: var(--text-light); font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="wa-sync-gallery-checkbox" style="accent-color: var(--theme-blue); width: 16px; height: 16px;">
+                            <b>同步收录到「记忆碎片」相册</b>
+                        </label>
+                        <input type="text" id="wa-sync-gallery-caption" class="wa-comment-input" style="display: none; width: 100%; border: none; border-bottom: 1px solid var(--theme-blue); border-radius: 0; padding: 10px 5px; margin-top: 10px; font-size: 14px; background: transparent;" placeholder="为这张照片写下一句专属回忆（不填则默认使用WA正文）...">
+                    </div>
+
                     <div class="wa-editor-tools">
                         <div class="wa-tools-left">
                             <input type="file" id="wa-image-input" accept="image/*" style="display: none;">

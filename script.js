@@ -233,6 +233,11 @@ function initWAModule() {
                 currentImageBase64 = event.target.result;
                 waImagePreview.src = currentImageBase64;
                 waPreviewContainer.style.display = 'inline-block';
+
+                // 【新增 1】：只要有图片了，就把“同步相册”的开关显示出来！
+                const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
+                if (syncWrapper) syncWrapper.style.display = 'block';
+
             };
             reader.readAsDataURL(file);
         }
@@ -241,7 +246,35 @@ function initWAModule() {
     waRemoveImage.addEventListener('click', () => {
         currentImageBase64 = null; waImagePreview.src = '';
         waPreviewContainer.style.display = 'none'; waImageInput.value = ''; 
+
+        // 【新增 2】：取消图片时，隐藏同步开关，并重置勾选状态
+        const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
+        const syncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
+        const syncCaption = document.getElementById('wa-sync-gallery-caption');
+        if (syncWrapper) {
+            syncWrapper.style.display = 'none';
+            syncCheckbox.checked = false;
+            syncCaption.style.display = 'none';
+            syncCaption.value = '';
+        }
+
     });
+    // 【新增 3】：监听勾选动作，控制输入框的出现和隐藏
+        const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
+        const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
+        if (waSyncCheckbox && waSyncCaption) {
+            waSyncCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    waSyncCaption.style.display = 'block';
+                    waSyncCaption.focus(); // 自动聚焦，体验拉满
+                } else {
+                    waSyncCaption.style.display = 'none';
+                    waSyncCaption.value = '';
+                }
+            });
+        }
+
+
 
     let posts = JSON.parse(localStorage.getItem('wa_posts')) || [];
     
@@ -292,12 +325,49 @@ function initWAModule() {
     
     renderPosts();
 
+// ---------------------------------------------------------
+    // 改造后的 WA 发布逻辑（包含同步到记忆碎片相册的功能）
+    // ---------------------------------------------------------
     waSubmitBtn.addEventListener('click', () => { 
         const content = waTextarea.value.trim();
         if (content === '' && !currentImageBase64) { alert('写点什么或者发张图吧！'); return; }
+        
+        // 1. 先保存 WA 自身的数据
         posts.unshift({ content: content, image: currentImageBase64, time: waCurrentTime.innerText, wordCount: content.length, comments: [] }); 
         localStorage.setItem('wa_posts', JSON.stringify(posts)); 
-        waTextarea.value = ''; waWordCount.innerText = '0'; waRemoveImage.click(); renderPosts();
+
+        // 2. 检查是否勾选了同步到相册 (并且确实有图片)
+        const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
+        const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
+        const waSyncWrapper = document.getElementById('wa-sync-gallery-wrapper');
+        
+        if (waSyncCheckbox && waSyncCheckbox.checked && currentImageBase64) {
+            let galleryPhotos = JSON.parse(localStorage.getItem('my_gallery')) || [];
+            
+            // 智能提取文案：优先用专用输入框的 -> 没有就截取WA正文前20字 -> 都没有就默认文字
+            let finalCaption = waSyncCaption.value.trim() || 
+                              (content.length > 20 ? content.substring(0, 20) + '...' : content) || 
+                              "未命名的记忆";
+            
+            try {
+                // 存入相册并保存
+                galleryPhotos.unshift({ src: currentImageBase64, caption: finalCaption });
+                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
+            } catch (e) {
+                alert("相册同步失败：存储空间不足，请清理旧照片！");
+            }
+            
+            // 重置同步选项面板
+            waSyncCheckbox.checked = false;
+            if (waSyncCaption) { waSyncCaption.style.display = 'none'; waSyncCaption.value = ''; }
+            if (waSyncWrapper) waSyncWrapper.style.display = 'none';
+        }
+
+        // 3. 收尾工作：清空界面，重新渲染
+        waTextarea.value = ''; 
+        waWordCount.innerText = '0'; 
+        waRemoveImage.click(); 
+        renderPosts();
     });
 
     window.addComment = function(postIndex) { 
@@ -632,12 +702,12 @@ function initAboutRuntime() {
 
 // 1. 网页第一次从浏览器正常打开时执行
 document.addEventListener("DOMContentLoaded", () => {
-    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();
+    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();;
 });
 
 // 2. 无刷新跳转后重新唤醒模块
 document.addEventListener('PjaxContentLoaded', () => {
-    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();
+    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();;
 });
 
 // =========================================================================
@@ -692,6 +762,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else { const otherBodyPool = [...motions.sad, ...motions.sneeze, ...motions.repeat]; chosenIndex = otherBodyPool[Math.floor(Math.random() * otherBodyPool.length)]; spokenText = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)]; }
 
                 model.motion('', chosenIndex); dialogBox.innerHTML = spokenText;
+
+                // ！！！【核心防御 1】：任何时候主动点她，强行把气泡按回默认高度！
+                dialogBox.style.top = '0px';
+                dialogBox.style.bottom = 'auto';
+
                 dialogBox.classList.remove('show'); void dialogBox.offsetWidth; dialogBox.classList.add('show');
                 clearTimeout(dialogTimer); dialogTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500); 
             });
@@ -699,3 +774,384 @@ document.addEventListener("DOMContentLoaded", () => {
         }).catch(err => { console.error("❌ 模型加载失败:", err); });
     }
 });
+
+// ================= 模块九：记忆碎片画廊 (含上传压缩与全屏放大) =================
+    const galleryContainer = document.getElementById('gallery-container');
+    if (galleryContainer) {
+        
+        const galleryInput = document.getElementById('gallery-image-input');
+        const galleryPreview = document.getElementById('gallery-image-preview');
+        const galleryPreviewBox = document.getElementById('gallery-preview-container');
+        const galleryCaption = document.getElementById('gallery-caption-input');
+        const gallerySubmit = document.getElementById('gallery-submit-btn');
+        const galleryRemove = document.getElementById('gallery-remove-image');
+
+        let currentGalleryBase64 = null;
+        let galleryPhotos = JSON.parse(localStorage.getItem('my_gallery')) || [
+            { src: "https://t.alcy.cc/ycy?1", caption: "2025 - Let's Go 出发" },
+            { src: "https://t.alcy.cc/ycy?2", caption: "FPGA & Verilog" },
+            { src: "https://t.alcy.cc/ycy?3", caption: "算法与视觉推演" }
+        ];
+
+        // 1. 【核心修复】：图片读取与超强 Canvas 压缩引擎
+        galleryInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 创建一个虚拟画布用来压缩图片
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 800; // 限制图片最大边长为 800px
+
+                        // 按比例缩小图片
+                        if (width > height && width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // 将压缩后的图片导出为 JPEG 格式，画质设定为 0.7（大幅减少体积，防止存爆）
+                        currentGalleryBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        galleryPreview.src = currentGalleryBase64;
+                        galleryPreviewBox.style.display = 'block';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        galleryRemove.addEventListener('click', () => {
+            currentGalleryBase64 = null;
+            galleryPreview.src = '';
+            galleryPreviewBox.style.display = 'none';
+            galleryInput.value = '';
+        });
+
+        // 2. 【UI 修复】：渲染瀑布流相册，加入“三个点”下拉菜单
+        function renderGallery() {
+            galleryContainer.innerHTML = ''; 
+            
+            galleryPhotos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                
+                const randomRotate = (Math.random() * 6 - 3).toFixed(1);
+                card.style.transform = `rotate(${randomRotate}deg)`;
+
+                // 注入“三个点”下拉菜单结构
+                card.innerHTML = `
+                    <img src="${photo.src}" alt="照片">
+                    <div class="photo-caption">${photo.caption}</div>
+                    
+                    <div class="wa-more-options" style="position: absolute; top: 10px; right: 10px;">
+                        <button class="wa-more-btn" style="background: rgba(0,0,0,0.4); color: white; padding: 4px 10px; border-radius: 20px;" onclick="toggleGalleryMenu(event, 'gallery-menu-${index}')">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                        <div id="gallery-menu-${index}" class="wa-dropdown-menu" style="right: 0; top: 35px; min-width: 120px;">
+                            <button class="wa-delete-btn" onclick="deletePhoto(event, ${index})"><i class="fa-solid fa-trash-can"></i> 删除记忆</button>
+                        </div>
+                    </div>
+                `;
+
+                // 点击卡片触发全屏放大
+                // 以前是传具体的 src 和 caption，现在改成直接传它的【索引序号 index】
+card.addEventListener('click', () => openLightbox(index));
+
+                galleryContainer.appendChild(card);
+            });
+        }
+
+        // 3. 提交并保存新照片
+        gallerySubmit.addEventListener('click', () => {
+            const caption = galleryCaption.value.trim();
+            if (!currentGalleryBase64) { alert('请先选择一张照片呀！'); return; }
+            if (!caption) { alert('给这张照片写点回忆吧！'); return; }
+
+            try {
+                galleryPhotos.unshift({ src: currentGalleryBase64, caption: caption });
+                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
+                galleryCaption.value = '';
+                galleryRemove.click();
+                renderGallery();
+            } catch (e) {
+                // 如果哪怕压缩了还是存满了，给个友好的提示
+                alert("记忆库已满！LocalStorage 容量不足，请删除几张旧照片后再试哦~");
+                galleryPhotos.shift(); // 把刚才塞进去的删掉
+            }
+        });
+
+        // 4. 【菜单与删除逻辑】
+        window.toggleGalleryMenu = function(event, menuId) {
+            event.stopPropagation(); // 【核心】：阻止点击事件冒泡，防止一按菜单就触发照片放大！
+            document.querySelectorAll('#gallery-container .wa-dropdown-menu').forEach(menu => { 
+                if (menu.id !== menuId) menu.classList.remove('show'); 
+            });
+            document.getElementById(menuId).classList.toggle('show');
+        };
+
+        window.deletePhoto = function(event, index) {
+            event.stopPropagation(); // 阻止放大
+            if(confirm("确定要销毁这段记忆碎片吗？")) {
+                galleryPhotos.splice(index, 1);
+                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
+                renderGallery();
+            }
+        };
+
+// 5. 灯箱 (左右翻页与键盘控制) 逻辑
+        const lightboxModal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+        
+        let currentLightboxIndex = 0; // 全局记录当前正在看第几张照片
+
+        // 打开灯箱
+        function openLightbox(index) {
+            document.querySelectorAll('#gallery-container .wa-dropdown-menu').forEach(menu => menu.classList.remove('show'));
+            currentLightboxIndex = index;
+            updateLightboxContent();
+            lightboxModal.classList.add('show');
+        }
+
+        // 更新灯箱里的图片和文字
+        function updateLightboxContent() {
+            if (galleryPhotos.length === 0) return;
+            const photo = galleryPhotos[currentLightboxIndex];
+            lightboxImg.src = photo.src;
+            lightboxCaption.innerText = photo.caption;
+        }
+
+        // 上一张
+        function showPrev(e) {
+            if (e) e.stopPropagation(); // 阻止点击事件穿透背景导致关闭灯箱
+            // (当前序号 - 1 + 总长度) % 总长度，实现无限循环翻页！
+            currentLightboxIndex = (currentLightboxIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
+            updateLightboxContent();
+        }
+
+        // 下一张
+        function showNext(e) {
+            if (e) e.stopPropagation(); 
+            currentLightboxIndex = (currentLightboxIndex + 1) % galleryPhotos.length;
+            updateLightboxContent();
+        }
+
+        // 绑定按钮点击事件
+        if (lightboxPrev) lightboxPrev.addEventListener('click', showPrev);
+        if (lightboxNext) lightboxNext.addEventListener('click', showNext);
+
+        // 点击右上角或背景关闭
+        lightboxClose.addEventListener('click', () => lightboxModal.classList.remove('show'));
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) lightboxModal.classList.remove('show');
+        });
+
+        // 【超级加分项】：绑定全局键盘事件
+        document.addEventListener('keydown', (e) => {
+            // 只有在灯箱打开的时候才监听键盘
+            if (lightboxModal.classList.contains('show')) {
+                if (e.key === 'ArrowLeft') showPrev();
+                else if (e.key === 'ArrowRight') showNext();
+                else if (e.key === 'Escape') lightboxModal.classList.remove('show'); // 按ESC键直接退出
+            }
+        });
+        // 初始渲染
+        renderGallery();
+    }
+
+// =========================================================================
+// ================= 模块十二：树枝悬挂御守与亚丝娜三段交互 =================
+// =========================================================================
+function initTreeOmamori() {
+    const treeSystem = document.getElementById('omamori-tree-system');
+    const charm = document.getElementById('omamori-charm');
+
+    if (!treeSystem || !charm) return;
+
+// 命运采样库 (终极老黄历版：二次元 + 慢生活 + 极客日常)
+    const fateLibrary = [
+        // --- 🏆 欧皇降临 (大吉) ---
+        { rank: "大吉", motto: "十连双黄！今天的你被系统和幸运女神同时眷顾了！", good: "单抽奇迹", bad: "头铁下毒池", item: "抽卡玄学歌" },
+        { rank: "大吉", motto: "玄学护体！明明一行代码都没改，Bug却奇迹般地自己消失了！", good: "一次编译通过", bad: "乱动祖传代码", item: "初音未来手办" },
+        { rank: "大吉", motto: "艾恩葛朗特万里无云，今天点外卖竟然被老板多送了一个鸡腿！", good: "尝试新口味", bad: "吃白水煮面", item: "冰镇可乐" },
+        
+        // --- 🌟 快乐源泉 (中吉) ---
+        { rank: "中吉", motto: "随机点开的新番意外地神仙，恭喜发现一部宝藏神作！", good: "一口气追平进度", bad: "手贱搜百度百科", item: "薯片与爆米花" },
+        { rank: "中吉", motto: "就像在看慢综艺《出发》一样，今天什么都不做，发呆也是一件正经事。", good: "漫无目的地散步", bad: "设定严密的计划表", item: "微风与阳光" },
+        { rank: "中吉", motto: "喜欢的角色今天存活确认，不仅没发便当，甚至还有高光时刻！", good: "疯狂截图做壁纸", bad: "在弹幕里剧透", item: "速效救心丸" },
+        { rank: "中吉", motto: "烙铁温度刚刚好，焊点圆润饱满，今天你是实验室里的‘焊武帝’。", good: "飞线修复老主板", bad: "带电插拔排线", item: "松香与吸锡器" },
+
+        // --- 🍀 小确幸 (小吉) ---
+        { rank: "小吉", motto: "出门正好赶上绿灯，踩着点上车，今天的时间管理大师就是你。", good: "随性出门转转", bad: "宅在家里发霉", item: "准时的手表" },
+        { rank: "小吉", motto: "OpenCV 识别到了奇怪的人脸？别怕，大概率只是墙上的海报反光。", good: "调参找到最优解", bad: "大半夜一个人测试", item: "偏振镜片" },
+        { rank: "小吉", motto: "今天撸到的猫咪脾气特别好，甚至主动翻肚皮给你摸。", good: "准备猫条加餐", bad: "试图给猫洗澡", item: "毛茸茸的触感" },
+
+        // --- 🍵 佛系躺平 (平安 / 末吉) ---
+        { rank: "平安", motto: "平凡的日常，才是最连续的奇迹。今天不如早点洗洗睡吧。", good: "躺平放空大脑", bad: "深夜网抑云", item: "柔软的抱枕" },
+        { rank: "平安", motto: "音乐播放器随机到了一首很久没听的动漫神曲，DNA 狠狠地动了！", good: "跟着副歌哼唱", bad: "外放打扰别人", item: "高解析度耳机" },
+        { rank: "末吉", motto: "今天没有拯救世界的任务，只要按时吃满三顿饭就算是巨大成功。", good: "吃一顿好的", bad: "疯狂立Flag", item: "豪华版泡面" },
+        { rank: "末吉", motto: "虽然天气很好，但在屋里拉上窗帘躺着，也是对周末的一种尊重。", good: "裹紧小被子", bad: "强迫自己打扫卫生", item: "懒人沙发" },
+
+        // --- 💦 高能预警 (凶 - 喜剧效果) ---
+        { rank: "小凶", motto: "前方高能预警！今天上网极易惨遭剧透，建议断网保平安。", good: "关掉手机睡大觉", bad: "点开热搜和评论区", item: "物理断网器" },
+        { rank: "小凶", motto: "墨菲定律生效中：当你想给别人演示功能时，它一定会报错死机。", good: "提前录好演示视频", bad: "骄傲地疯狂点击", item: "理直气壮的甩锅借口" },
+        { rank: "凶", motto: "不小心点开了手机前置摄像头，被自己刚睡醒的素颜暴击了。", good: "假装什么都没发生", bad: "直视镜头三十秒", item: "最高级美颜滤镜" }
+    ];
+
+    // 状态机：0=缩在屏幕外, 1=树枝已伸出, 2=亚丝娜已搭话, 3=正在出结果锁死
+    let state = 0;
+
+    // ---------------------------------------------------------
+    // 核心 1：御守自身的点击流转逻辑
+    // ---------------------------------------------------------
+ // ---------------------------------------------------------
+    // 核心 1：御守自身的点击流转逻辑 (带每日单抽限制与本地记忆)
+    // ---------------------------------------------------------
+    charm.addEventListener('click', (e) => {
+        const dialogBox = document.getElementById('live2d-dialog');
+
+        function showAsunaDialog(text, duration = 4500) {
+            if (!dialogBox) return;
+            
+            // 每次说话前，强制气泡回到普通的短文本位置（把 5px 换成你刚才满意的数值）
+            dialogBox.style.top = '0px'; 
+            dialogBox.style.bottom = 'auto';
+            
+            dialogBox.innerHTML = text;
+            dialogBox.classList.remove('show');
+            void dialogBox.offsetWidth; 
+            dialogBox.classList.add('show');
+
+            if (window.asunaDialogTimer) clearTimeout(window.asunaDialogTimer);
+            window.asunaDialogTimer = setTimeout(() => {
+                dialogBox.classList.remove('show');
+            }, duration);
+        }
+
+        if (state === 0) {
+            treeSystem.classList.remove('closed');
+            state = 1;
+            return; 
+        }
+
+        if (!dialogBox) {
+            alert("亚丝娜还在赶来的路上，请稍等一秒再点哦！");
+            return;
+        }
+
+        // 加上点击御守时的微微晃动特效
+        charm.style.transform = "scale(0.9) rotate(-5deg)";
+        setTimeout(() => charm.style.transform = "", 200);
+
+        // 获取今天的日期字符串，例如 "2026/2/24"
+        const todayStr = new Date().toLocaleDateString(); 
+        const savedDate = localStorage.getItem('omamori_date');
+        const savedFateStr = localStorage.getItem('omamori_result');
+
+        if (state === 1) {
+            // 【新逻辑】：检查今天是不是已经抽过了
+            if (savedDate === todayStr && savedFateStr) {
+                // 今天抽过了，进入拦截状态
+                state = 3; 
+                // 亚丝娜的专属傲娇提醒语音
+                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500);
+                
+                // ！！！【修复重点】：因为这句话也很长，所以说完后立刻把它也拉升到长文本的高度！
+                dialogBox.style.top = 'auto';
+                dialogBox.style.bottom = 'calc(100% - 90px)'; // 这里用你之前调好的数值
+
+                // 等她说完上面那段话后，再展示缓存的运势结果
+                setTimeout(() => {
+                    const fate = JSON.parse(savedFateStr);
+                    const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
+                    
+                    showAsunaDialog(speech, 6000); 
+                    
+                    // 把气泡往上拉，适配长文本（把 60px 换成你刚才满意的长文本偏移数值）
+                    dialogBox.style.top = 'auto';
+                    dialogBox.style.bottom = 'calc(100% - 90px)'; 
+                    
+                    setTimeout(() => {
+                        treeSystem.classList.add('closed');
+                        state = 0; 
+                        // 重置气泡位置
+                        dialogBox.style.top = '5px'; 
+                        dialogBox.style.bottom = 'auto';
+                    }, 6000);
+                }, 4500);
+
+            } else {
+                // 今天还没抽过，走正常的询问流程
+                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000);
+                state = 2;
+            }
+        } 
+        else if (state === 2) {
+            state = 3; 
+            showAsunaDialog("正在向系统提交祈愿请求...", 2000);
+            
+            setTimeout(() => {
+                const fate = fateLibrary[Math.floor(Math.random() * fateLibrary.length)];
+                
+                // 【新逻辑】：出签的瞬间，把日期和结果永久刻印在 LocalStorage 里
+                localStorage.setItem('omamori_date', todayStr);
+                localStorage.setItem('omamori_result', JSON.stringify(fate));
+                
+                const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
+                
+                showAsunaDialog(speech, 6000); 
+                
+                // 拉升气泡（把 60px 换成你的数值）
+                dialogBox.style.top = 'auto';
+                dialogBox.style.bottom = 'calc(100% - 90px)'; 
+                
+                setTimeout(() => {
+                    treeSystem.classList.add('closed');
+                    state = 0; 
+                    // 重置气泡位置
+                    dialogBox.style.top = '5px'; 
+                    dialogBox.style.bottom = 'auto';
+                }, 6000);
+            }, 1000);
+        }
+    });
+
+    // ---------------------------------------------------------
+    // 核心 2：全局防误触侦测 (点击外部自动收回)
+    // ---------------------------------------------------------
+    document.addEventListener('click', (e) => {
+        // 如果树枝本来就是收回状态，直接无视
+        if (state === 0) return;
+
+        // 【精细判定】：点击的区域是否属于“御守系统”或“亚丝娜互动区”
+        const isClickOmamori = e.target.closest('#omamori-tree-system');
+        const isClickAsuna = e.target.closest('#live2d-container') || e.target.closest('#live2d-dialog');
+
+        // 如果既不是点御守，也不是点亚丝娜，那就立刻收回树枝！
+        if (!isClickOmamori && !isClickAsuna) {
+            treeSystem.classList.add('closed');
+            state = 0; // 重置交互状态
+            
+            // 【细节满分】：如果亚丝娜正在聊抽签的事，点击别处也会顺便把气泡关掉，防止出戏
+            const dialogBox = document.getElementById('live2d-dialog');
+            if (dialogBox && (dialogBox.innerHTML.includes('运势') || dialogBox.innerHTML.includes('祈愿请求'))) {
+                dialogBox.classList.remove('show');
+            }
+        }
+    });
+}

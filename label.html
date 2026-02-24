@@ -47,32 +47,54 @@
                 </div>
             </aside>
 
-            <main id="magic-screen" class="content-area">
+            <main class="content-area">
                 <header class="article-header">
-                    <h2 class="sub-title" style="font-size: large;">いまふたりに <br>God bless...</h2>
-                    <h1 class="main-title">如今 神定将佑护我们</h1>
-                    <div class="article-meta">
-                        <span><i class="fa-regular fa-calendar"></i> 发表于 2024-04-04</span> | 
-                        <span><i class="fa-solid fa-clock-rotate-left"></i> 更新于 2025-07-18</span> | 
-                        <span><i class="fa-regular fa-folder"></i> 分类于 Other</span>
-                    </div>
+                    <h1 class="main-title" style="text-align: left; margin-bottom: 10px;">记忆碎片 / Fragments</h1>
+                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 30px;">「 那些闪烁在摇光深处的瞬间... 」</p>
                 </header>
-                <div class="article-image"><img src="https://picsum.photos/800/450" alt="Main Article Image"></div>
-                <div class="article-content">
-                    <h3>碎碎念</h3>
-                    <ol>
-                        <li>好诶</li>
-                        <li>这东西是 <strong>真的</strong> 超级无敌<strong>好玩</strong></li>
-                        <li><code>万岁！！！！！！！！</code> </li>
-                    </ol>
+
+                <div class="wa-editor-box" style="margin-bottom: 40px;">
+                    <input type="text" id="gallery-caption-input" class="wa-comment-input" style="width: 100%; border:none; border-bottom: 1px solid var(--glass-border); border-radius:0; padding: 10px 5px; margin-bottom: 15px;" placeholder="这张照片背后的记忆是...">
+                    
+                    <div id="gallery-preview-container" style="display: none; position: relative; max-width: 200px; margin-bottom: 15px;">
+                        <img id="gallery-image-preview" src="" alt="预览图" style="width: 100%; border-radius: 8px;">
+                        <button id="gallery-remove-image" class="wa-delete-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 50%; color: white;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <div class="wa-editor-tools">
+                        <div class="wa-tools-left">
+                            <input type="file" id="gallery-image-input" accept="image/*" style="display: none;">
+                            <label for="gallery-image-input" class="anime-btn"><i class="fa-solid fa-image"></i> 选择照片</label>
+                        </div>
+                        <div class="wa-tools-right">
+                            <button id="gallery-submit-btn" class="anime-btn confirm">封装记忆</button>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="gallery-container" class="gallery-container">
+                    </div>
+
+
+
             </main>
+
         </div>
     </div>
 
     <div id="fps-box" class="fps-box">FPS: -- (≧∇≦)ﾉ</div>
     <div id="global-player" class="global-player collapsed"><div class="player-toggle" id="player-toggle"><img id="player-cover" src="https://picsum.photos/100" class="record-spin"><div class="player-sleeve"><div class="record-center"></div></div><div class="toggle-arrow"><i class="fa-solid fa-chevron-right"></i></div></div><div class="player-panel"><div class="player-info"><div class="player-title" id="player-title">等待载入...</div><div class="player-artist" id="player-artist">Asuna</div><div class="player-controls"><button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button><button id="btn-play" class="play-btn-main"><i class="fa-solid fa-play"></i></button><button id="btn-next"><i class="fa-solid fa-forward-step"></i></button></div></div><ul class="playlist" id="playlist"></ul></div><audio id="bg-music"></audio></div>
     <div id="live2d-container" class="live2d-container"><canvas id="live2d-canvas"></canvas></div>
+
+    <div id="lightbox-modal" class="lightbox-modal">
+    <span class="lightbox-close" id="lightbox-close">&times;</span>
+
+    <span class="lightbox-prev" id="lightbox-prev"><i class="fa-solid fa-chevron-left"></i></span>
+    <span class="lightbox-next" id="lightbox-next"><i class="fa-solid fa-chevron-right"></i></span>
+
+    <img class="lightbox-content" id="lightbox-img">
+    <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
 
     <script src="https://unpkg.com/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
     <script src="https://fastly.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>

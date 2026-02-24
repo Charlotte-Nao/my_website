@@ -1612,7 +1612,7 @@ color: #ffffff;
     position: absolute;
     /* 【位置上调】：从 5px 改成了 -15px，气泡会整体往上移 20 像素 */
     /* 如果你觉得还不够高，可以继续改成 -25px 或者 -30px */
-    top: -15px; 
+    top: 0px; 
     left: 50%;
     
     min-width: 260px; 
@@ -2020,3 +2020,431 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0 !important; 
 }
 
+/* ================================================================= */
+/* ================= 记忆碎片：散落拍立得相册 ================= */
+/* ================================================================= */
+
+/* 相册的大桌子：让照片自动换行、居中对齐、拉开间距 */
+.gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 35px;
+    padding: 20px 10px 50px 10px;
+}
+
+/* 拍立得照片卡片基础样式 */
+.photo-card {
+    background: #ffffff;
+    padding: 12px 12px 45px 12px; /* 底部留出 45px 用来写字 */
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); /* 淡淡的投影 */
+    position: relative;
+    cursor: pointer;
+    width: 220px;
+    /* 划重点：给所有的变化加上 0.4秒 的高级缓动动画 */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 照片里面的图片 */
+.photo-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover; /* 保证图片不被拉伸变形 */
+    border-radius: 4px;
+}
+
+/* 照片底部的文字说明 */
+.photo-caption {
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    font-family: "Courier New", Courier, monospace; /* 用打字机字体更有感觉 */
+}
+
+/* 🎯 悬停大招：摆正、放大、浮起！ */
+/* 注意：这里必须加 !important，因为等下我们要用 JS 随机给它初始角度 */
+.photo-card:hover {
+    transform: scale(1.15) rotate(0deg) translateY(-10px) !important;
+    z-index: 10; /* 悬停时保证它在最上面，不被别人挡住 */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 🌙 暗黑模式适配：拍立得纸张变暗，文字变灰 */
+body.dark-mode .photo-card {
+    background: rgba(30, 40, 60, 0.85) !important;
+    border: 1px solid rgba(100, 150, 255, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode .photo-caption {
+    color: #dcdcdc;
+}
+/* ================================================================= */
+/* ================= 记忆碎片：自适应瀑布流与放大灯箱 ================= */
+/* ================================================================= */
+
+/* 1. 瀑布流大容器 (Masonry Layout) */
+.gallery-container {
+    column-count: 3; /* 电脑端显示 3 列 */
+    column-gap: 20px; /* 列之间的间距 */
+    padding-bottom: 50px;
+}
+
+/* 屏幕较小的时候，自动变成 2 列或 1 列 */
+@media (max-width: 900px) { .gallery-container { column-count: 2; } }
+@media (max-width: 600px) { .gallery-container { column-count: 1; } }
+
+/* 2. 拍立得卡片本体 */
+.photo-card {
+    background: #ffffff;
+    padding: 10px 10px 40px 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+    cursor: pointer;
+    break-inside: avoid; /* 核心：防止一张照片被强行切成两半排在两列！ */
+    margin-bottom: 20px; /* 上下间距 */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 里面的图片：宽度100%，高度自适应！完美解决形状单一问题 */
+.photo-card img {
+    width: 100%;
+    height: auto; /* 核心：按照原图比例自动伸缩高度！ */
+    border-radius: 4px;
+    display: block;
+}
+
+.photo-caption {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+}
+
+.photo-card:hover {
+    transform: scale(1.05) translateY(-5px) !important;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+    z-index: 10;
+}
+
+/* 🌙 暗黑模式适配 */
+body.dark-mode .photo-card {
+    background: rgba(30, 40, 60, 0.85) !important;
+    border: 1px solid rgba(100, 150, 255, 0.2);
+}
+body.dark-mode .photo-caption { color: #dcdcdc; }
+
+/* ================================================================= */
+/* ================= 灯箱终极修复：绝对贴合尺寸与随动背景 ================= */
+/* ================================================================= */
+
+/* 1. 基础弹窗大背景（白天模式：明亮毛玻璃） */
+.lightbox-modal {
+    display: none; 
+    position: fixed !important;
+    z-index: 9999999 !important;
+    left: 0 !important; top: 0 !important;
+    width: 100% !important; height: 100% !important;
+    background-color: rgba(255, 255, 255, 0.85) !important; /* 白天的纯白毛玻璃 */
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
+}
+.lightbox-modal.show { display: flex !important; }
+
+/* 🌙 2. 暗黑模式下的弹窗大背景（黑夜模式：深空蓝毛玻璃） */
+body.dark-mode .lightbox-modal {
+    background-color: rgba(15, 20, 35, 0.92) !important; /* 完美匹配 Link Start 的海军蓝 */
+}
+
+/* ================================================================= */
+/* ================= 灯箱弹窗：剥夺白底，绝对贴身 ================= */
+/* ================================================================= */
+
+.lightbox-content {
+    max-width: 85vw !important;
+    max-height: 80vh !important;
+    width: fit-content !important;  /* 【解药1】强迫外框紧贴图片内容 */
+    height: fit-content !important; /* 【解药2】强迫外框紧贴图片高度 */
+    
+    background: transparent !important; /* 【终极解药】：干掉一切全局继承来的白色背景！ */
+    border: none !important;            /* 干掉边框 */
+    padding: 0 !important;              /* 干掉内边距 */
+    
+    border-radius: 8px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important; /* 让阴影真正打在图片边缘 */
+    object-fit: cover !important; 
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* 4. 底部说明文字样式 */
+.lightbox-caption {
+    margin-top: 15px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+    color: #333 !important; /* 白天黑字 */
+}
+body.dark-mode .lightbox-caption {
+    color: #82b1ff !important; /* 黑夜发光蓝字 */
+}
+
+/* 5. 右上角关闭叉叉样式 */
+.lightbox-close {
+    position: absolute !important;
+    top: 20px !important;
+    right: 35px !important;
+    font-size: 40px !important;
+    cursor: pointer !important;
+    color: #555 !important; /* 白天灰叉 */
+    transition: all 0.3s ease !important;
+}
+body.dark-mode .lightbox-close {
+    color: #dcdcdc !important; /* 黑夜亮灰叉 */
+}
+.lightbox-close:hover { 
+    transform: scale(1.2) !important; 
+}
+/* ================================================================= */
+/* ================= 灯箱左右切换按钮样式 (修复白天隐形问题) ================= */
+/* ================================================================= */
+
+.lightbox-prev, .lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    /* 【修改这里】：白天模式下使用你的“蓝蔷薇色” (主题蓝)，并稍微降低一点透明度显得柔和 */
+    color: var(--theme-blue); 
+    opacity: 0.7; 
+    
+    font-size: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 20px;
+    z-index: 10000000;
+    user-select: none;
+}
+
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }
+
+/* 【修改这里】：白天模式下，鼠标放上去透明度拉满，并且散发蓝蔷薇颜色的光晕！ */
+.lightbox-prev:hover, .lightbox-next:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.2);
+    text-shadow: 0 0 15px var(--theme-blue);
+}
+
+/* 🌙 暗黑模式下的按钮保持不变（因为你觉得这个颜色挺好的） */
+body.dark-mode .lightbox-prev, 
+body.dark-mode .lightbox-next {
+    color: rgba(130, 177, 255, 0.6); 
+    opacity: 1; /* 这里重置 opacity，因为颜色里自带了 0.6 的透明度 */
+}
+body.dark-mode .lightbox-prev:hover, 
+body.dark-mode .lightbox-next:hover {
+    color: #82b1ff;
+    text-shadow: 0 0 15px rgba(130, 177, 255, 0.8);
+}
+/* ================= 首页随机图片：悬停互动特效 ================= */
+.article-image {
+    overflow: hidden; /* 防止图片放大时撑破容器 */
+    border-radius: 8px; /* 确保有圆角 */
+}
+
+.article-image img {
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease !important;
+}
+
+.article-image img:hover {
+    transform: scale(1.03) !important; /* 微微放大 3% */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important; /* 加深高级阴影 */
+}
+
+/* ========================================================================= */
+/* ================= 屏幕右侧隐藏抽屉与御守样式 ================= */
+/* ========================================================================= */
+.omamori-drawer {
+    position: fixed;
+    top: 60%; /* 放低一点，不挡视线 */
+    right: -100px; /* 默认隐藏主体部分，只留把手在外面 */
+    width: 100px;
+    height: 140px;
+    background: rgba(15, 20, 35, 0.85); /* 深邃的海军蓝毛玻璃 */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--theme-blue);
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.5);
+    transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.omamori-drawer.open {
+    right: 0; /* 展开抽屉 */
+}
+
+/* 抽屉的拉手 */
+.omamori-handle {
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 50px;
+    background: rgba(15, 20, 35, 0.85);
+    border: 1px solid var(--theme-blue);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--theme-blue);
+    cursor: pointer;
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+}
+
+.omamori-drawer.open .omamori-handle i {
+    transform: rotate(180deg); /* 抽屉拉开后，箭头反向 */
+}
+
+.omamori-handle:hover {
+    color: #fff;
+    background: var(--theme-blue);
+}
+
+/* 御守本体 */
+.omamori-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.omamori-charm:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(130, 177, 255, 0.4);
+}
+
+/* 御守顶部的穿线孔装饰 */
+.omamori-charm::before {
+    content: ""; position: absolute; top: 6px; width: 6px; height: 6px; background: #f1faee; border-radius: 50%;
+}
+
+.omamori-hint {
+    font-size: 11px; color: #82b1ff; opacity: 0.8; font-weight: bold;
+}
+
+/* ========================================================================= */
+/* ================= 屏幕右侧：树枝与御守悬挂系统 ================= */
+/* ========================================================================= */
+.omamori-system {
+    position: fixed;
+    top: 35%; /* 偏上一点，符合树枝垂下的视觉习惯 */
+    right: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 靠右对齐 */
+    /* 弹性伸出动画，模仿树枝弹出的真实物理感 */
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+}
+
+/* 🔒 闭合状态：向右隐藏，只漏出御守的左下角 */
+.omamori-system.closed {
+    transform: translateX(110px); 
+}
+
+/* 🌿 树枝设计 */
+.omamori-branch {
+    width: 140px;
+    height: 8px;
+    background: #4a3320; /* 深邃的木质棕色 */
+    border-radius: 6px 0 0 6px;
+    position: relative;
+    box-shadow: 2px 5px 10px rgba(0,0,0,0.3);
+}
+/* 给树枝加个小分叉，显得更自然 */
+.omamori-branch::after {
+    content: ''; position: absolute; top: -6px; right: 30px; 
+    width: 20px; height: 5px; background: #4a3320; 
+    transform: rotate(35deg); border-radius: 3px;
+}
+/* 🌙 暗黑模式下的树枝变为夜樱木色 */
+body.dark-mode .omamori-branch, 
+body.dark-mode .omamori-branch::after {
+    background: #2c3e50;
+    box-shadow: 2px 5px 15px rgba(0,0,0,0.6);
+}
+
+/* 🪢 悬挂系统（绳索+御守的整体） */
+.omamori-hanging {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 90px; /* 绑在树枝靠外的位置 */
+    transform-origin: top center; /* 旋转轴定在绳子与树枝的绑点 */
+    /* 整体随风摇曳动画 */
+    animation: swayHanging 4s ease-in-out infinite;
+}
+
+@keyframes swayHanging {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+}
+
+/* 🧶 细绳 */
+.omamori-string {
+    width: 2px;
+    height: 35px;
+    background: #d4af37; /* 金色结绳 */
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+body.dark-mode .omamori-string { background: #82b1ff; }
+
+/* 🏮 御守本体 (复用你的高颜值设计) */
+.omamori-charm {
+    position: relative; width: 50px; height: 75px;
+    background: linear-gradient(135deg, #e63946, #b00020);
+    border: 2px dashed rgba(255, 215, 0, 0.7); border-radius: 4px;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 15%, 100% 100%, 0% 100%, 0% 15%);
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start; padding-top: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: box-shadow 0.3s ease, transform 0.2s;
+}
+body.dark-mode .omamori-charm {
+    background: linear-gradient(135deg, #2a0845, #6441A5);
+    border-color: rgba(130, 177, 255, 0.7);
+}
+
+/* 悬停时：抓住御守发光 */
+.omamori-charm:hover { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+body.dark-mode .omamori-charm:hover { box-shadow: 0 0 20px rgba(130, 177, 255, 0.8); }
+
+/* 御守细节 */
+.omamori-knot { position: absolute; top: 5px; width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+.omamori-label {
+    background: rgba(255, 255, 255, 0.95); color: #b00020; padding: 6px 3px; border-radius: 2px; writing-mode: vertical-rl; font-size: 13px; font-weight: 900; letter-spacing: 2px; box-shadow: 1px 1px 3px rgba(0,0,0,0.3); font-family: "Microsoft YaHei", "Noto Serif CJK SC", serif;
+}
+body.dark-mode .omamori-label { background: rgba(15, 20, 35, 0.9); color: #82b1ff; box-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
