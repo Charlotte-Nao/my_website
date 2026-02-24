@@ -280,6 +280,7 @@ color: #ffffff;
 /* 1. 鼠标光彩拖尾 */
 .mouse-trail {
     position: fixed;
+    position: fixed;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -296,6 +297,7 @@ color: #ffffff;
 /* 2. 点击烟花爆炸粒子 */
 .firework-particle {
     position: fixed;
+    position: fixed;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -311,6 +313,7 @@ color: #ffffff;
 
 /* 3. 点击烟花爆炸圆环 */
 .firework-ring {
+    position: fixed;
     position: fixed;
     width: 10px;
     height: 10px;
@@ -706,6 +709,8 @@ color: #ffffff;
 
 .fps-box {
     position: fixed;
+    bottom: 10px; 
+    left: 15px;  
     bottom: 10px; 
     left: 15px;  
     /* 【修改】：将透明度从 0.6 提高到 0.85，背景变得更白、更实一点 */
@@ -1406,6 +1411,7 @@ color: #ffffff;
 .global-player {
     position: fixed;
     left: 20px;
+    bottom: 50px;
     bottom: 50px;
     z-index: 1000;
     display: flex;

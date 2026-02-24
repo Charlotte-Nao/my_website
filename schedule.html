@@ -12,6 +12,8 @@
         <div class="main-container">
             <aside class="sidebar">
                 <div class="sidebar-block"><div class="sidebar-header"><h1 style="font-size: 32px; letter-spacing: 2px;">FLA</h1><p style="font-size: 13px; opacity: 0.8;">Blue Rose System</p></div>
+            <aside class="sidebar">
+                <div class="sidebar-block"><div class="sidebar-header"><h1 style="font-size: 32px; letter-spacing: 2px;">FLA</h1><p style="font-size: 13px; opacity: 0.8;">Blue Rose System</p></div>
                     <nav class="sidebar-menu" style="padding: 15px 10px;">
                         <ul>
                             <li><a href="WA.html"><i class="fa-solid fa-droplet"></i> WA</a></li>
@@ -21,8 +23,13 @@
                             <li><a href="archive.html"><i class="fa-solid fa-box-archive"></i> 归档</a><span class="badge">147</span></li>
                             <li><a href="label.html"><i class="fa-solid fa-tags"></i> 标签</a><span class="badge">246</span></li>
                             <li><a href="#"><i class="fa-solid fa-folder"></i> 分类</a><span class="badge">10</span></li>
+                            <li><a href="index.html"><i class="fa-solid fa-home"></i> 首页</a></li>
+                            <li><a href="archive.html"><i class="fa-solid fa-box-archive"></i> 归档</a><span class="badge">147</span></li>
+                            <li><a href="label.html"><i class="fa-solid fa-tags"></i> 标签</a><span class="badge">246</span></li>
+                            <li><a href="#"><i class="fa-solid fa-folder"></i> 分类</a><span class="badge">10</span></li>
                             <li><a href="left.html"><i class="fa-solid fa-comment"></i> 留言</a></li>
                             <li><a href="#"><i class="fa-solid fa-link"></i> 友链</a></li>
+                            <li><a href="about.html"><i class="fa-solid fa-info-circle"></i> 关于</a></li>
                             <li><a href="about.html"><i class="fa-solid fa-info-circle"></i> 关于</a></li>
                         </ul>
                     </nav>
@@ -33,9 +40,16 @@
                     <i class="fa-solid fa-moon"></i> Link Start
                     </button>
 
+                <div class="sidebar-block developer-profile"><img class="profile-avatar" src="Charlotte.jpg"><h3 class="profile-name">Charlotte</h3><p class="profile-signature">「 哪怕是虚幻的世界，这份感情也是真实的。」</p>
+                    
+                    <button id="dark-mode-btn" class="dark-mode-toggle">
+                    <i class="fa-solid fa-moon"></i> Link Start
+                    </button>
+
                 </div>
             </aside>
 
+            <main id="magic-screen" class="content-area">
             <main id="magic-screen" class="content-area">
                 <header class="article-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h1 class="main-title" style="margin: 0;">我的课表</h1>
@@ -47,14 +61,18 @@
                 </header>
 
                 <div class="schedule-box"><div class="schedule-grid" id="schedule-grid"></div></div>
+                <div class="schedule-box"><div class="schedule-grid" id="schedule-grid"></div></div>
 
                 <div class="ddl-section">
                     <h2 class="sub-title" style="margin-bottom: 15px; border-bottom: 2px dashed var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-stopwatch"></i> 死线追踪 (DDL)</h2>
+                    <h2 class="sub-title" style="margin-bottom: 15px; border-bottom: 2px dashed var(--glass-border); padding-bottom: 10px;"><i class="fa-solid fa-stopwatch"></i> 死线追踪 (DDL)</h2>
                     <div class="ddl-input-box">
+                        <input type="text" id="ddl-task-input" placeholder="输入待办事项...">
                         <input type="text" id="ddl-task-input" placeholder="输入待办事项...">
                         <input type="date" id="ddl-date-input">
                         <button id="ddl-add-btn" class="anime-btn confirm" style="padding: 8px 15px; border-radius: 6px;">添加 DDL</button>
                     </div>
+                    <div id="ddl-list" class="ddl-list"></div>
                     <div id="ddl-list" class="ddl-list"></div>
                 </div>
 
@@ -73,8 +91,14 @@
                             <label>教室/地点:</label><input type="text" id="course-room" class="wa-comment-input" style="width: 100%; margin-bottom: 10px;">
                         </div>
                         <div class="anime-modal-footer"><button class="anime-btn cancel" onclick="closeCourseModal()">取消</button><button class="anime-btn" style="color: #ff7675;" onclick="deleteCourse()">删除</button><button class="anime-btn confirm" onclick="saveCourse()">保存</button></div>
+                        <div class="anime-modal-footer"><button class="anime-btn cancel" onclick="closeCourseModal()">取消</button><button class="anime-btn" style="color: #ff7675;" onclick="deleteCourse()">删除</button><button class="anime-btn confirm" onclick="saveCourse()">保存</button></div>
                     </div>
                 </div>
+
+                <div id="ddl-confirm-modal" class="anime-modal-overlay">
+                    <div class="anime-modal-box"><div class="anime-modal-header">✨ 任务完成 ✨</div><div class="anime-modal-body" style="padding: 30px 20px;">确定搞定了吗？太棒啦！</div><div class="anime-modal-footer"><button id="ddl-cancel-btn" class="anime-btn cancel">手滑了</button><button id="ddl-confirm-btn" class="anime-btn confirm" style="color: #74b9ff;">我做完啦！</button></div></div>
+                </div>
+            </main>
 
                 <div id="ddl-confirm-modal" class="anime-modal-overlay">
                     <div class="anime-modal-box"><div class="anime-modal-header">✨ 任务完成 ✨</div><div class="anime-modal-body" style="padding: 30px 20px;">确定搞定了吗？太棒啦！</div><div class="anime-modal-footer"><button id="ddl-cancel-btn" class="anime-btn cancel">手滑了</button><button id="ddl-confirm-btn" class="anime-btn confirm" style="color: #74b9ff;">我做完啦！</button></div></div>
@@ -83,10 +107,17 @@
         </div>
     </div>
 
+
     <div id="fps-box" class="fps-box">FPS: -- (≧∇≦)ﾉ</div>
     <div id="global-player" class="global-player collapsed"><div class="player-toggle" id="player-toggle"><img id="player-cover" src="https://picsum.photos/100" class="record-spin"><div class="player-sleeve"><div class="record-center"></div></div><div class="toggle-arrow"><i class="fa-solid fa-chevron-right"></i></div></div><div class="player-panel"><div class="player-info"><div class="player-title" id="player-title">等待载入...</div><div class="player-artist" id="player-artist">Asuna</div><div class="player-controls"><button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button><button id="btn-play" class="play-btn-main"><i class="fa-solid fa-play"></i></button><button id="btn-next"><i class="fa-solid fa-forward-step"></i></button></div></div><ul class="playlist" id="playlist"></ul></div><audio id="bg-music"></audio></div>
     <div id="live2d-container" class="live2d-container"><canvas id="live2d-canvas"></canvas></div>
+    <div id="global-player" class="global-player collapsed"><div class="player-toggle" id="player-toggle"><img id="player-cover" src="https://picsum.photos/100" class="record-spin"><div class="player-sleeve"><div class="record-center"></div></div><div class="toggle-arrow"><i class="fa-solid fa-chevron-right"></i></div></div><div class="player-panel"><div class="player-info"><div class="player-title" id="player-title">等待载入...</div><div class="player-artist" id="player-artist">Asuna</div><div class="player-controls"><button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button><button id="btn-play" class="play-btn-main"><i class="fa-solid fa-play"></i></button><button id="btn-next"><i class="fa-solid fa-forward-step"></i></button></div></div><ul class="playlist" id="playlist"></ul></div><audio id="bg-music"></audio></div>
+    <div id="live2d-container" class="live2d-container"><canvas id="live2d-canvas"></canvas></div>
 
+    <script src="https://unpkg.com/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+    <script src="https://unpkg.com/pixi-live2d-display@0.4.0/dist/cubism2.min.js"></script>
+    <script src="music/playlist.js"></script>
     <script src="https://unpkg.com/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
     <script src="https://fastly.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
     <script src="https://unpkg.com/pixi-live2d-display@0.4.0/dist/cubism2.min.js"></script>
