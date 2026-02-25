@@ -1,4 +1,10 @@
 // =========================================================================
+// ==================== 云端数据库 Supabase 引擎点火 =========================
+// =========================================================================
+const SUPABASE_URL = 'https://gbwufsuebgumzxwgoyuk.supabase.co'; // 填入你的 Project URL
+const SUPABASE_KEY = 'sb_publishable_0DgesrYTvmwjpkSCIvOEIA_TSh5SmqZ'; // 填入你的 anon key
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// =========================================================================
 // ==================== 终极魔法：Pjax 无刷新页面跳转 ====================
 // =========================================================================
 document.addEventListener('click', async (e) => {
@@ -201,7 +207,7 @@ function initRandomImage() {
     if (articleImg) articleImg.src = "https://t.alcy.cc/ycy?" + new Date().getTime();
 }
 
-//WA页面的初始化
+// WA页面的初始化 (全云端联机版)
 function initWAModule() {
     const waTextarea = document.getElementById('wa-textarea');
     if (!waTextarea) return; 
@@ -216,6 +222,7 @@ function initWAModule() {
     const waFeed = document.getElementById('wa-feed');
     let currentImageBase64 = null; 
 
+    // 时钟逻辑
     if (window.waClockTimer) clearInterval(window.waClockTimer); 
     window.waClockTimer = setInterval(() => {
         if(!document.getElementById('wa-current-time')) { clearInterval(window.waClockTimer); return; }
@@ -225,6 +232,7 @@ function initWAModule() {
 
     waTextarea.addEventListener('input', () => { waWordCount.innerText = waTextarea.value.length; });
 
+    // 图片读取逻辑 (与原本保持一致)
     waImageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -233,11 +241,8 @@ function initWAModule() {
                 currentImageBase64 = event.target.result;
                 waImagePreview.src = currentImageBase64;
                 waPreviewContainer.style.display = 'inline-block';
-
-                // 【新增 1】：只要有图片了，就把“同步相册”的开关显示出来！
                 const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
                 if (syncWrapper) syncWrapper.style.display = 'block';
-
             };
             reader.readAsDataURL(file);
         }
@@ -246,38 +251,51 @@ function initWAModule() {
     waRemoveImage.addEventListener('click', () => {
         currentImageBase64 = null; waImagePreview.src = '';
         waPreviewContainer.style.display = 'none'; waImageInput.value = ''; 
-
-        // 【新增 2】：取消图片时，隐藏同步开关，并重置勾选状态
         const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
         const syncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
         const syncCaption = document.getElementById('wa-sync-gallery-caption');
         if (syncWrapper) {
-            syncWrapper.style.display = 'none';
-            syncCheckbox.checked = false;
-            syncCaption.style.display = 'none';
-            syncCaption.value = '';
+            syncWrapper.style.display = 'none'; syncCheckbox.checked = false;
+            syncCaption.style.display = 'none'; syncCaption.value = '';
         }
-
     });
-    // 【新增 3】：监听勾选动作，控制输入框的出现和隐藏
-        const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
-        const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
-        if (waSyncCheckbox && waSyncCaption) {
-            waSyncCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    waSyncCaption.style.display = 'block';
-                    waSyncCaption.focus(); // 自动聚焦，体验拉满
-                } else {
-                    waSyncCaption.style.display = 'none';
-                    waSyncCaption.value = '';
-                }
-            });
-        }
 
+    const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
+    const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
+    if (waSyncCheckbox && waSyncCaption) {
+        waSyncCheckbox.addEventListener('change', function() {
+            if (this.checked) { waSyncCaption.style.display = 'block'; waSyncCaption.focus(); } 
+            else { waSyncCaption.style.display = 'none'; waSyncCaption.value = ''; }
+        });
+    }
 
-
-    let posts = JSON.parse(localStorage.getItem('wa_posts')) || [];
+    // ================= 云端核心：拉取数据 =================
+    let posts = [];
     
+    async function loadWAFromCloud() {
+        try {
+            // 同时拉取 WA 动态和对应的评论
+            const { data: postsData, error: pErr } = await supabase.from('wa_posts').select('*').order('created_at', { ascending: false });
+            const { data: commentsData, error: cErr } = await supabase.from('comments').select('*').eq('target_type', 'wa').order('created_at', { ascending: true });
+            
+            if (pErr || cErr) throw new Error("拉取失败");
+
+            posts = postsData.map(post => {
+                // 将评论匹配到对应的动态下
+                const postComments = commentsData.filter(c => c.target_id === post.id).map(c => ({
+                    db_id: c.id, text: c.content, time: new Date(c.created_at).toLocaleString(), nickname: c.nickname
+                }));
+                return {
+                    db_id: post.id, content: post.content, image: post.image_url,
+                    time: new Date(post.created_at).toLocaleString(),
+                    wordCount: post.content ? post.content.length : 0,
+                    comments: postComments
+                };
+            });
+            renderPosts();
+        } catch (error) { console.error("WA 同步异常:", error); }
+    }
+
     function renderPosts() {
         waFeed.innerHTML = '';
         posts.forEach((post, index) => {
@@ -303,7 +321,7 @@ function initWAModule() {
                 post.comments.forEach((c, cIndex) => {
                     commentsHTML += `
                     <div class="wa-comment-item" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
-                        <span>💬 ${c.text} <span class="wa-comment-time">${c.time}</span></span>
+                        <span>💬 <span style="font-weight:bold; color:var(--theme-pink);">${c.nickname}:</span> ${c.text} <span class="wa-comment-time">${c.time}</span></span>
                         <div class="wa-more-options">
                             <button class="wa-more-btn" onclick="toggleMenu('comment-menu-${index}-${cIndex}')"><i class="fa-solid fa-ellipsis"></i></button>
                             <div id="comment-menu-${index}-${cIndex}" class="wa-dropdown-menu">
@@ -315,69 +333,64 @@ function initWAModule() {
             }
             commentsHTML += `
                     <div class="wa-comment-input-box">
-                        <input type="text" class="wa-comment-input" placeholder="写下评论..." id="comment-input-${index}">
+                        <input type="text" class="wa-comment-input" placeholder="写下评论 (附带昵称)..." id="comment-input-${index}">
                         <button class="wa-comment-btn" onclick="addComment(${index})">提交</button>
                     </div></div>`;
             postDiv.innerHTML = postHTML + commentsHTML;
             waFeed.appendChild(postDiv);
         });
     }
-    
-    renderPosts();
 
-// ---------------------------------------------------------
-    // 改造后的 WA 发布逻辑（包含同步到记忆碎片相册的功能）
-    // ---------------------------------------------------------
-    waSubmitBtn.addEventListener('click', () => { 
+    // ================= 云端核心：发布 WA =================
+    waSubmitBtn.addEventListener('click', async () => { 
         const content = waTextarea.value.trim();
         if (content === '' && !currentImageBase64) { alert('写点什么或者发张图吧！'); return; }
         
-        // 1. 先保存 WA 自身的数据
-        posts.unshift({ content: content, image: currentImageBase64, time: waCurrentTime.innerText, wordCount: content.length, comments: [] }); 
-        localStorage.setItem('wa_posts', JSON.stringify(posts)); 
+        waSubmitBtn.innerText = "发送中..."; waSubmitBtn.disabled = true;
 
-        // 2. 检查是否勾选了同步到相册 (并且确实有图片)
-        const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
-        const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
-        const waSyncWrapper = document.getElementById('wa-sync-gallery-wrapper');
-        
-        if (waSyncCheckbox && waSyncCheckbox.checked && currentImageBase64) {
-            let galleryPhotos = JSON.parse(localStorage.getItem('my_gallery')) || [];
+        try {
+            // 1. 存入 wa_posts 库
+            const { error: postErr } = await supabase.from('wa_posts').insert([{ content: content, image_url: currentImageBase64 }]);
+            if (postErr) throw postErr;
+
+            // 2. 智能同步到相册库 (photos)
+            const waSyncCheckbox = document.getElementById('wa-sync-gallery-checkbox');
+            const waSyncCaption = document.getElementById('wa-sync-gallery-caption');
+            const waSyncWrapper = document.getElementById('wa-sync-gallery-wrapper');
             
-            // 智能提取文案：优先用专用输入框的 -> 没有就截取WA正文前20字 -> 都没有就默认文字
-            let finalCaption = waSyncCaption.value.trim() || 
-                              (content.length > 20 ? content.substring(0, 20) + '...' : content) || 
-                              "未命名的记忆";
-            
-            try {
-                // 存入相册并保存
-                galleryPhotos.unshift({ src: currentImageBase64, caption: finalCaption });
-                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
-            } catch (e) {
-                alert("相册同步失败：存储空间不足，请清理旧照片！");
+            if (waSyncCheckbox && waSyncCheckbox.checked && currentImageBase64) {
+                let finalCaption = waSyncCaption.value.trim() || (content.length > 20 ? content.substring(0, 20) + '...' : content) || "未命名的记忆";
+                await supabase.from('photos').insert([{ image_url: currentImageBase64, description: finalCaption }]);
+                
+                waSyncCheckbox.checked = false;
+                if (waSyncCaption) { waSyncCaption.style.display = 'none'; waSyncCaption.value = ''; }
+                if (waSyncWrapper) waSyncWrapper.style.display = 'none';
             }
-            
-            // 重置同步选项面板
-            waSyncCheckbox.checked = false;
-            if (waSyncCaption) { waSyncCaption.style.display = 'none'; waSyncCaption.value = ''; }
-            if (waSyncWrapper) waSyncWrapper.style.display = 'none';
-        }
 
-        // 3. 收尾工作：清空界面，重新渲染
-        waTextarea.value = ''; 
-        waWordCount.innerText = '0'; 
-        waRemoveImage.click(); 
-        renderPosts();
+            // 清理与刷新
+            waTextarea.value = ''; waWordCount.innerText = '0'; waRemoveImage.click(); 
+            await loadWAFromCloud();
+        } catch(e) { alert("云端发送失败！网络波动或文件过大"); }
+        finally { waSubmitBtn.innerText = "发布"; waSubmitBtn.disabled = false; }
     });
 
-    window.addComment = function(postIndex) { 
+    // ================= 云端核心：提交评论 =================
+    window.addComment = async function(postIndex) { 
         const inputEle = document.getElementById(`comment-input-${postIndex}`);
-        const text = inputEle.value.trim();
-        if (text === '') return;
-        const now = new Date();
-        const timeStr = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        posts[postIndex].comments.push({ text: text, time: timeStr });
-        localStorage.setItem('wa_posts', JSON.stringify(posts)); renderPosts();
+        const fullText = inputEle.value.trim();
+        if (fullText === '') return;
+        
+        // 简单处理访客昵称提取 (格式：昵称 评论内容)
+        let nickname = "匿名访客"; let text = fullText;
+        if(fullText.includes(' ')) { nickname = fullText.split(' ')[0]; text = fullText.substring(nickname.length).trim(); }
+
+        const targetDbId = posts[postIndex].db_id;
+
+        try {
+            await supabase.from('comments').insert([{ target_type: 'wa', target_id: targetDbId, nickname: nickname, content: text }]);
+            inputEle.value = '';
+            await loadWAFromCloud();
+        } catch(e) { alert("评论失败！"); }
     };
 
     window.toggleMenu = function(menuId) {
@@ -395,20 +408,32 @@ function initWAModule() {
 
     window.showCustomConfirm = function(type, postIndex, commentIndex = -1) {
         pendingDeleteData = { type, postIndex, commentIndex };
-        if(type === 'post') customModalMsg.innerText = "真的要删掉这条记录吗？不可恢复哦~ (；′⌒`)";
-        else customModalMsg.innerText = "真的要删掉这条记录吗？不可恢复哦~ (；′⌒`)";
+        customModalMsg.innerText = "真的要删掉这条记录吗？不可恢复哦~ (；′⌒`)";
         customModal.classList.add('show');
         document.querySelectorAll('.wa-dropdown-menu').forEach(m => m.classList.remove('show'));
     };
 
     document.getElementById('modal-cancel-btn').addEventListener('click', () => { customModal.classList.remove('show'); pendingDeleteData = null; });
-    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+    
+    // ================= 云端核心：删除数据 =================
+    document.getElementById('modal-confirm-btn').addEventListener('click', async () => {
         if (!pendingDeleteData) return;
-        if (pendingDeleteData.type === 'post') posts.splice(pendingDeleteData.postIndex, 1);
-        else if (pendingDeleteData.type === 'comment') posts[pendingDeleteData.postIndex].comments.splice(pendingDeleteData.commentIndex, 1);
-        localStorage.setItem('wa_posts', JSON.stringify(posts));
-        renderPosts(); customModal.classList.remove('show'); pendingDeleteData = null;
+        try {
+            if (pendingDeleteData.type === 'post') {
+                const dbId = posts[pendingDeleteData.postIndex].db_id;
+                await supabase.from('wa_posts').delete().eq('id', dbId);
+                await supabase.from('comments').delete().eq('target_type', 'wa').eq('target_id', dbId); // 顺手清理孤儿评论
+            } else if (pendingDeleteData.type === 'comment') {
+                const dbId = posts[pendingDeleteData.postIndex].comments[pendingDeleteData.commentIndex].db_id;
+                await supabase.from('comments').delete().eq('id', dbId);
+            }
+            await loadWAFromCloud();
+        } catch (e) { alert("删除失败！"); }
+        customModal.classList.remove('show'); pendingDeleteData = null;
     });
+
+    // 网页加载时启动同步
+    loadWAFromCloud();
 }
 
 
@@ -623,14 +648,15 @@ function initRemindModule() {
 }
 
 
-// 留言模块的初始化
+// 留言模块的初始化 (全网络云端联机版)
 function initMessageBoard() {
     const commentListEle = document.getElementById('comment-list');
     if (!commentListEle) return;
 
     const qqInput = document.getElementById('comment-qq'); const nicknameInput = document.getElementById('comment-nickname');
     const textInput = document.getElementById('comment-text'); const submitBtn = document.getElementById('comment-submit');
-    const countEle = document.getElementById('comment-count'); let comments = JSON.parse(localStorage.getItem('my_messages')) || [];
+    const countEle = document.getElementById('comment-count'); 
+    let comments = []; // 本地缓存数组清空，全靠云端拉取
 
     function getDeviceBadge() {
         const ua = navigator.userAgent; let browser = "Web"; let os = "PC";
@@ -640,6 +666,35 @@ function initMessageBoard() {
     }
 
     function getNowStr() { const now = new Date(); return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'); }
+
+    // 【新增核心】：从云端 Supabase 抽取数据
+    async function loadCommentsFromCloud() {
+        try {
+            const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            
+            comments = data.map(row => {
+                try {
+                    // 解包高级富文本数据
+                    const richData = JSON.parse(row.content);
+                    return {
+                        db_id: row.id, // 记录数据库真实 ID，为了删除时精准制导
+                        nickname: row.nickname,
+                        qq: richData.qq || '',
+                        text: richData.text || row.content,
+                        date: new Date(row.created_at).toLocaleString(), // 转换云端时间
+                        deviceBadge: richData.deviceBadge || getDeviceBadge(),
+                        replies: richData.replies || []
+                    };
+                } catch(e) {
+                    return { db_id: row.id, nickname: row.nickname, qq: '', text: row.content, date: new Date(row.created_at).toLocaleString(), deviceBadge: getDeviceBadge(), replies: [] };
+                }
+            });
+            renderComments();
+        } catch (error) {
+            console.error("跨次元通信失败：", error);
+        }
+    }
 
     function renderComments() {
         commentListEle.innerHTML = ''; countEle.innerText = comments.length;
@@ -657,16 +712,42 @@ function initMessageBoard() {
         });
     }
 
-    submitBtn.addEventListener('click', () => {
+    // 【新增核心】：发送数据到云端
+    submitBtn.addEventListener('click', async () => {
         const nickname = nicknameInput.value.trim(); const qq = qqInput.value.trim(); const text = textInput.value.trim();
         if (!nickname || !text) { alert('昵称和想说的话都是必填的哦！'); return; }
-        comments.unshift({ nickname, qq, text, date: getNowStr(), deviceBadge: getDeviceBadge(), replies: [] }); localStorage.setItem('my_messages', JSON.stringify(comments)); textInput.value = ''; renderComments();
+        
+        submitBtn.innerText = "上传中..."; submitBtn.disabled = true;
+
+        const richContent = JSON.stringify({ text: text, qq: qq, deviceBadge: getDeviceBadge(), replies: [] });
+
+        try {
+            const { error } = await supabase.from('messages').insert([{ nickname: nickname, content: richContent }]);
+            if (error) throw error;
+            textInput.value = '';
+            await loadCommentsFromCloud(); // 重新拉取云端数据刷新页面
+        } catch (error) {
+            alert("留言发送失败，请检查网络！");
+        } finally {
+            submitBtn.innerText = "发表留言"; submitBtn.disabled = false;
+        }
     });
 
-    window.submitReply = function(index) {
+    window.submitReply = async function(index) {
         const textInput = document.getElementById(`reply-text-${index}`); const text = textInput.value.trim(); const replierName = document.getElementById('comment-nickname').value.trim();
         if (!text || !replierName) { alert('回复内容和上方昵称不能为空！'); return; }
-        if (!comments[index].replies) comments[index].replies = []; comments[index].replies.push({ nickname: replierName, text: text, date: getNowStr() }); localStorage.setItem('my_messages', JSON.stringify(comments)); renderComments();
+
+        const targetComment = comments[index];
+        if (!targetComment.replies) targetComment.replies = [];
+        targetComment.replies.push({ nickname: replierName, text: text, date: getNowStr() });
+
+        const richContent = JSON.stringify({ text: targetComment.text, qq: targetComment.qq, deviceBadge: targetComment.deviceBadge, replies: targetComment.replies });
+
+        try {
+            const { error } = await supabase.from('messages').update({ content: richContent }).eq('id', targetComment.db_id);
+            if (error) throw error;
+            await loadCommentsFromCloud();
+        } catch (e) { alert("回复发送失败！"); }
     };
 
     window.toggleMsgMenu = function(menuId) { document.querySelectorAll('.message-board-container .wa-dropdown-menu').forEach(menu => { if (menu.id !== menuId) menu.classList.remove('show'); }); document.getElementById(menuId).classList.toggle('show'); };
@@ -674,9 +755,28 @@ function initMessageBoard() {
 
     const commentModal = document.getElementById('comment-confirm-modal'); const commentModalMsg = document.getElementById('comment-modal-msg'); let pendingDel = null;
     window.showCommentConfirm = function(type, cIndex, rIndex = -1) { pendingDel = { type, cIndex, rIndex }; commentModalMsg.innerText = type === 'comment' ? "确定要抹去这条留言的记忆吗？(。>︿<)" : "要删掉这条回复吗？"; commentModal.classList.add('show'); document.querySelectorAll('.message-board-container .wa-dropdown-menu').forEach(m => m.classList.remove('show')); };
+    
     document.getElementById('comment-modal-cancel').addEventListener('click', () => { commentModal.classList.remove('show'); pendingDel = null; });
-    document.getElementById('comment-modal-confirm').addEventListener('click', () => { if (!pendingDel) return; if (pendingDel.type === 'comment') comments.splice(pendingDel.cIndex, 1); else if (pendingDel.type === 'reply') comments[pendingDel.cIndex].replies.splice(pendingDel.rIndex, 1); localStorage.setItem('my_messages', JSON.stringify(comments)); renderComments(); commentModal.classList.remove('show'); pendingDel = null; });
-    renderComments();
+    
+    // 【新增核心】：从云端删除数据
+    document.getElementById('comment-modal-confirm').addEventListener('click', async () => { 
+        if (!pendingDel) return; 
+        try {
+            if (pendingDel.type === 'comment') {
+                await supabase.from('messages').delete().eq('id', comments[pendingDel.cIndex].db_id);
+            } else if (pendingDel.type === 'reply') {
+                const targetComment = comments[pendingDel.cIndex];
+                targetComment.replies.splice(pendingDel.rIndex, 1);
+                const richContent = JSON.stringify({ text: targetComment.text, qq: targetComment.qq, deviceBadge: targetComment.deviceBadge, replies: targetComment.replies });
+                await supabase.from('messages').update({ content: richContent }).eq('id', targetComment.db_id);
+            }
+            await loadCommentsFromCloud();
+        } catch(e) { alert("删除失败！"); }
+        commentModal.classList.remove('show'); pendingDel = null; 
+    });
+    
+    // 首次进入页面时，直接拉取云端数据！
+    loadCommentsFromCloud();
 }
 
 
@@ -775,7 +875,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// ================= 模块九：记忆碎片画廊 (含上传压缩与全屏放大) =================
+// ================= 模块九：记忆碎片画廊 (全云端联机版) =================
     const galleryContainer = document.getElementById('gallery-container');
     if (galleryContainer) {
         
@@ -787,13 +887,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const galleryRemove = document.getElementById('gallery-remove-image');
 
         let currentGalleryBase64 = null;
-        let galleryPhotos = JSON.parse(localStorage.getItem('my_gallery')) || [
-            { src: "https://t.alcy.cc/ycy?1", caption: "2025 - Let's Go 出发" },
-            { src: "https://t.alcy.cc/ycy?2", caption: "FPGA & Verilog" },
-            { src: "https://t.alcy.cc/ycy?3", caption: "算法与视觉推演" }
-        ];
+        let galleryPhotos = [];
 
-        // 1. 【核心修复】：图片读取与超强 Canvas 压缩引擎
+        // 核心：拉取云端相册
+        async function loadPhotosFromCloud() {
+            try {
+                const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                galleryPhotos = data.map(row => ({ db_id: row.id, src: row.image_url, caption: row.description }));
+                renderGallery();
+            } catch (e) { console.error("照片云端同步失败:", e); }
+        }
+
+        // 压缩代码保持不变
         galleryInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -801,27 +907,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 reader.onload = (event) => {
                     const img = new Image();
                     img.onload = () => {
-                        // 创建一个虚拟画布用来压缩图片
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const MAX_SIZE = 800; // 限制图片最大边长为 800px
-
-                        // 按比例缩小图片
-                        if (width > height && width > MAX_SIZE) {
-                            height *= MAX_SIZE / width;
-                            width = MAX_SIZE;
-                        } else if (height > MAX_SIZE) {
-                            width *= MAX_SIZE / height;
-                            height = MAX_SIZE;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
+                        let width = img.width; let height = img.height;
+                        const MAX_SIZE = 800; 
+                        if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+                        else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
-                        // 将压缩后的图片导出为 JPEG 格式，画质设定为 0.7（大幅减少体积，防止存爆）
                         currentGalleryBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         galleryPreview.src = currentGalleryBase64;
                         galleryPreviewBox.style.display = 'block';
@@ -833,28 +926,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         galleryRemove.addEventListener('click', () => {
-            currentGalleryBase64 = null;
-            galleryPreview.src = '';
-            galleryPreviewBox.style.display = 'none';
-            galleryInput.value = '';
+            currentGalleryBase64 = null; galleryPreview.src = '';
+            galleryPreviewBox.style.display = 'none'; galleryInput.value = '';
         });
 
-        // 2. 【UI 修复】：渲染瀑布流相册，加入“三个点”下拉菜单
         function renderGallery() {
             galleryContainer.innerHTML = ''; 
-            
             galleryPhotos.forEach((photo, index) => {
                 const card = document.createElement('div');
                 card.className = 'photo-card';
-                
                 const randomRotate = (Math.random() * 6 - 3).toFixed(1);
                 card.style.transform = `rotate(${randomRotate}deg)`;
 
-                // 注入“三个点”下拉菜单结构
                 card.innerHTML = `
                     <img src="${photo.src}" alt="照片">
                     <div class="photo-caption">${photo.caption}</div>
-                    
                     <div class="wa-more-options" style="position: absolute; top: 10px; right: 10px;">
                         <button class="wa-more-btn" style="background: rgba(0,0,0,0.4); color: white; padding: 4px 10px; border-radius: 20px;" onclick="toggleGalleryMenu(event, 'gallery-menu-${index}')">
                             <i class="fa-solid fa-ellipsis"></i>
@@ -864,116 +950,88 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
                 `;
-
-                // 点击卡片触发全屏放大
-                // 以前是传具体的 src 和 caption，现在改成直接传它的【索引序号 index】
-card.addEventListener('click', () => openLightbox(index));
-
+                card.addEventListener('click', () => openLightbox(index));
                 galleryContainer.appendChild(card);
             });
         }
 
-        // 3. 提交并保存新照片
-        gallerySubmit.addEventListener('click', () => {
+        // 核心：上传到云端
+        gallerySubmit.addEventListener('click', async () => {
             const caption = galleryCaption.value.trim();
             if (!currentGalleryBase64) { alert('请先选择一张照片呀！'); return; }
             if (!caption) { alert('给这张照片写点回忆吧！'); return; }
 
+            gallerySubmit.innerText = "上传中..."; gallerySubmit.disabled = true;
+
             try {
-                galleryPhotos.unshift({ src: currentGalleryBase64, caption: caption });
-                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
-                galleryCaption.value = '';
-                galleryRemove.click();
-                renderGallery();
+                await supabase.from('photos').insert([{ image_url: currentGalleryBase64, description: caption }]);
+                galleryCaption.value = ''; galleryRemove.click();
+                await loadPhotosFromCloud();
             } catch (e) {
-                // 如果哪怕压缩了还是存满了，给个友好的提示
-                alert("记忆库已满！LocalStorage 容量不足，请删除几张旧照片后再试哦~");
-                galleryPhotos.shift(); // 把刚才塞进去的删掉
+                alert("云端传输失败！可能是图片即使压缩后仍超过限制，或网络波动。");
+            } finally {
+                gallerySubmit.innerText = "发布到画廊"; gallerySubmit.disabled = false;
             }
         });
 
-        // 4. 【菜单与删除逻辑】
         window.toggleGalleryMenu = function(event, menuId) {
-            event.stopPropagation(); // 【核心】：阻止点击事件冒泡，防止一按菜单就触发照片放大！
+            event.stopPropagation(); 
             document.querySelectorAll('#gallery-container .wa-dropdown-menu').forEach(menu => { 
                 if (menu.id !== menuId) menu.classList.remove('show'); 
             });
             document.getElementById(menuId).classList.toggle('show');
         };
 
-        window.deletePhoto = function(event, index) {
-            event.stopPropagation(); // 阻止放大
+        window.deletePhoto = async function(event, index) {
+            event.stopPropagation(); 
             if(confirm("确定要销毁这段记忆碎片吗？")) {
-                galleryPhotos.splice(index, 1);
-                localStorage.setItem('my_gallery', JSON.stringify(galleryPhotos));
-                renderGallery();
+                const dbId = galleryPhotos[index].db_id;
+                try {
+                    await supabase.from('photos').delete().eq('id', dbId);
+                    await loadPhotosFromCloud();
+                } catch(e) { alert("销毁失败！"); }
             }
         };
 
-// 5. 灯箱 (左右翻页与键盘控制) 逻辑
+        // 灯箱逻辑
         const lightboxModal = document.getElementById('lightbox-modal');
         const lightboxImg = document.getElementById('lightbox-img');
         const lightboxCaption = document.getElementById('lightbox-caption');
         const lightboxClose = document.getElementById('lightbox-close');
         const lightboxPrev = document.getElementById('lightbox-prev');
         const lightboxNext = document.getElementById('lightbox-next');
-        
-        let currentLightboxIndex = 0; // 全局记录当前正在看第几张照片
+        let currentLightboxIndex = 0; 
 
-        // 打开灯箱
         function openLightbox(index) {
             document.querySelectorAll('#gallery-container .wa-dropdown-menu').forEach(menu => menu.classList.remove('show'));
-            currentLightboxIndex = index;
-            updateLightboxContent();
-            lightboxModal.classList.add('show');
+            currentLightboxIndex = index; updateLightboxContent(); lightboxModal.classList.add('show');
         }
 
-        // 更新灯箱里的图片和文字
         function updateLightboxContent() {
             if (galleryPhotos.length === 0) return;
             const photo = galleryPhotos[currentLightboxIndex];
-            lightboxImg.src = photo.src;
-            lightboxCaption.innerText = photo.caption;
+            lightboxImg.src = photo.src; lightboxCaption.innerText = photo.caption;
         }
 
-        // 上一张
-        function showPrev(e) {
-            if (e) e.stopPropagation(); // 阻止点击事件穿透背景导致关闭灯箱
-            // (当前序号 - 1 + 总长度) % 总长度，实现无限循环翻页！
-            currentLightboxIndex = (currentLightboxIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
-            updateLightboxContent();
-        }
+        function showPrev(e) { if (e) e.stopPropagation(); currentLightboxIndex = (currentLightboxIndex - 1 + galleryPhotos.length) % galleryPhotos.length; updateLightboxContent(); }
+        function showNext(e) { if (e) e.stopPropagation(); currentLightboxIndex = (currentLightboxIndex + 1) % galleryPhotos.length; updateLightboxContent(); }
 
-        // 下一张
-        function showNext(e) {
-            if (e) e.stopPropagation(); 
-            currentLightboxIndex = (currentLightboxIndex + 1) % galleryPhotos.length;
-            updateLightboxContent();
-        }
-
-        // 绑定按钮点击事件
         if (lightboxPrev) lightboxPrev.addEventListener('click', showPrev);
         if (lightboxNext) lightboxNext.addEventListener('click', showNext);
-
-        // 点击右上角或背景关闭
         lightboxClose.addEventListener('click', () => lightboxModal.classList.remove('show'));
-        lightboxModal.addEventListener('click', (e) => {
-            if (e.target === lightboxModal) lightboxModal.classList.remove('show');
-        });
+        lightboxModal.addEventListener('click', (e) => { if (e.target === lightboxModal) lightboxModal.classList.remove('show'); });
 
-        // 【超级加分项】：绑定全局键盘事件
         document.addEventListener('keydown', (e) => {
-            // 只有在灯箱打开的时候才监听键盘
             if (lightboxModal.classList.contains('show')) {
                 if (e.key === 'ArrowLeft') showPrev();
                 else if (e.key === 'ArrowRight') showNext();
-                else if (e.key === 'Escape') lightboxModal.classList.remove('show'); // 按ESC键直接退出
+                else if (e.key === 'Escape') lightboxModal.classList.remove('show'); 
             }
         });
-        // 初始渲染
-        renderGallery();
+        
+        // 初始加载云端相册
+        loadPhotosFromCloud();
     }
-
 // =========================================================================
 // ================= 模块十二：树枝悬挂御守与亚丝娜三段交互 =================
 // =========================================================================
