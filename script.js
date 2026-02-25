@@ -173,11 +173,28 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        // function loadSong(index) {
+        //     const song = songs[index];
+        //     titleEle.innerText = song.title; artistEle.innerText = song.artist;
+        //     coverImg.src = song.cover; audio.src = song.src;
+        //     document.querySelectorAll('.playlist li').forEach((li, i) => { li.classList.toggle('active', i === index); });
+        // }
+
+        // ================= 终极挂载：Hugging Face 全球 CDN 节点 =================
+        const HF_BASE_URL = 'https://huggingface.co/datasets/Charlotte-Nao/blue-rose-music/resolve/main/';
+
         function loadSong(index) {
             const song = songs[index];
-            titleEle.innerText = song.title; artistEle.innerText = song.artist;
-            coverImg.src = song.cover; audio.src = song.src;
-            document.querySelectorAll('.playlist li').forEach((li, i) => { li.classList.toggle('active', i === index); });
+            titleEle.innerText = song.title; 
+            artistEle.innerText = song.artist;
+            
+            // 【核心魔法】：自动给歌单里的相对路径加上 Hugging Face 的云端前缀
+            coverImg.src = HF_BASE_URL + song.cover; 
+            audio.src = HF_BASE_URL + song.src;
+            
+            document.querySelectorAll('.playlist li').forEach((li, i) => { 
+                li.classList.toggle('active', i === index); 
+            });
         }
 
         function playMusic() { audio.play(); coverImg.classList.add('playing'); btnPlay.innerHTML = '<i class="fa-solid fa-pause"></i>'; }
