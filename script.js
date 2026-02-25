@@ -112,11 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
             body.classList.toggle('dark-mode');
             const currentlyDark = body.classList.contains('dark-mode');
             
-            // 2. 播放中二的科技提示音效
-            if (linkStartAudio) {
-                linkStartAudio.currentTime = 0; // 进度归零
-                linkStartAudio.play().catch(e => console.log('浏览器可能限制了自动播放音效'));
-            }
+            // // 2. 播放中二的科技提示音效
+            // if (linkStartAudio) {
+            //     linkStartAudio.currentTime = 0; // 进度归零
+            //     linkStartAudio.play().catch(e => console.log('浏览器可能限制了自动播放音效'));
+            // }
 
             // 3. 更改按钮文字，并把状态保存到浏览器的本地记忆中
             if (currentlyDark) {
@@ -457,14 +457,28 @@ function initFPS() {
 }
 
 
-//课表页面初始化
-function initScheduleAndDDL() {
+// =========================================================================
+// ================= 课表页面初始化 (全云端联机版) =======================
+// =========================================================================
+async function initScheduleAndDDL() {
     const scheduleGrid = document.getElementById('schedule-grid');
     if (!scheduleGrid) return;
     
     const courseColors = ['#fff0f1', '#e0f7fa', '#f3e5f5', '#fff9c4', '#ffe0b2', '#e8f5e9'];
-    let courses = JSON.parse(localStorage.getItem('my_courses'));
-    if (!courses) {
+    
+    let courses = []; let coursesDbId = null;
+    let ddls = []; let ddlsDbId = null;
+
+    // 1. 从云端统一记忆体拉取数据
+    try {
+        const { data: cData } = await supabase.from('app_data').select('*').eq('data_key', 'my_courses').single();
+        if (cData) { courses = JSON.parse(cData.data_value); coursesDbId = cData.id; }
+        
+        const { data: dData } = await supabase.from('app_data').select('*').eq('data_key', 'my_ddls').single();
+        if (dData) { ddls = JSON.parse(dData.data_value); ddlsDbId = dData.id; }
+    } catch(e) { console.log("课表/DDL：云端初次加载或暂无数据"); }
+
+    if (courses.length === 0) {
         courses = [
             { id: 1, startWeek: 1, endWeek: 16, weekType: 'all', day: 2, start: 2, end: 4, name: '人工智能工程基础(四)', room: '仙II-310', colorIndex: 1 },
             { id: 2, startWeek: 1, endWeek: 16, weekType: 'all', day: 3, start: 2, end: 4, name: '智能机器人创新实践', room: '基础实验楼', colorIndex: 2 },
@@ -473,7 +487,22 @@ function initScheduleAndDDL() {
             { id: 5, startWeek: 1, endWeek: 16, weekType: 'all', day: 2, start: 5, end: 6, name: '操作系统与Linux', room: '仙II-306', colorIndex: 5 },
             { id: 6, startWeek: 1, endWeek: 16, weekType: 'all', day: 3, start: 5, end: 6, name: '数学物理方法', room: '仙I-319', colorIndex: 0 }
         ];
-        localStorage.setItem('my_courses', JSON.stringify(courses));
+    }
+
+    // 云端保存黑魔法函数
+    async function saveCoursesToCloud() {
+        if (coursesDbId) { await supabase.from('app_data').update({ data_value: JSON.stringify(courses) }).eq('id', coursesDbId); } 
+        else {
+            const { data } = await supabase.from('app_data').insert({ data_key: 'my_courses', data_value: JSON.stringify(courses) }).select().single();
+            if(data) coursesDbId = data.id;
+        }
+    }
+    async function saveDDLsToCloud() {
+        if (ddlsDbId) { await supabase.from('app_data').update({ data_value: JSON.stringify(ddls) }).eq('id', ddlsDbId); } 
+        else {
+            const { data } = await supabase.from('app_data').insert({ data_key: 'my_ddls', data_value: JSON.stringify(ddls) }).select().single();
+            if(data) ddlsDbId = data.id;
+        }
     }
 
     let currentWeek = 4; const termStartDate = new Date('2026-03-02'); 
@@ -544,26 +573,42 @@ function initScheduleAndDDL() {
         }
         courseModal.classList.add('show');
     }
+    
     window.closeCourseModal = function() { courseModal.classList.remove('show'); }
-    window.saveCourse = function() {
+    
+    // 【核心接入云端】：保存课程
+    window.saveCourse = async function() {
         const startWeek = parseInt(document.getElementById('course-start-week').value); const endWeek = parseInt(document.getElementById('course-end-week').value);
         const weekType = document.getElementById('course-week-type').value; const day = parseInt(document.getElementById('course-day').value);
         const start = parseInt(document.getElementById('course-start').value); const end = parseInt(document.getElementById('course-end').value);
         const name = document.getElementById('course-name').value.trim(); const room = document.getElementById('course-room').value.trim();
+        
         if (!name) { alert('课程名称不能为空！'); return; } if (start > end || startWeek > endWeek) { alert('节次/周次错误！'); return; }
+        
         if (currentEditId) {
             const index = courses.findIndex(c => c.id === currentEditId);
             if (index > -1) { courses[index].startWeek = startWeek; courses[index].endWeek = endWeek; courses[index].weekType = weekType; courses[index].day = day; courses[index].start = start; courses[index].end = end; courses[index].name = name; courses[index].room = room; }
         } else { courses.push({ id: Date.now(), startWeek, endWeek, weekType, day, start, end, name, room, colorIndex: Math.floor(Math.random() * courseColors.length) }); }
-        localStorage.setItem('my_courses', JSON.stringify(courses)); closeCourseModal(); renderSchedule();
+        
+        document.body.style.cursor = 'wait'; // 鼠标变成转圈提示上传中
+        await saveCoursesToCloud();
+        document.body.style.cursor = 'default';
+        closeCourseModal(); renderSchedule();
     }
-    window.deleteCourse = function() {
-        if (currentEditId && confirm('确定要删除这节课吗？')) { courses = courses.filter(c => c.id !== currentEditId); localStorage.setItem('my_courses', JSON.stringify(courses)); closeCourseModal(); renderSchedule(); }
+    
+    // 【核心接入云端】：删除课程
+    window.deleteCourse = async function() {
+        if (currentEditId && confirm('确定要删除这节课吗？')) { 
+            courses = courses.filter(c => c.id !== currentEditId); 
+            document.body.style.cursor = 'wait';
+            await saveCoursesToCloud();
+            document.body.style.cursor = 'default';
+            closeCourseModal(); renderSchedule(); 
+        }
     }
 
     const ddlTaskInput = document.getElementById('ddl-task-input'); const ddlDateInput = document.getElementById('ddl-date-input');
     const ddlAddBtn = document.getElementById('ddl-add-btn'); const ddlList = document.getElementById('ddl-list');
-    let ddls = JSON.parse(localStorage.getItem('my_ddls')) || [];
 
     function renderDDLs() {
         ddlList.innerHTML = ''; ddls.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -578,23 +623,42 @@ function initScheduleAndDDL() {
         });
     }
 
-    ddlAddBtn.addEventListener('click', () => {
+    // 【核心接入云端】：新增 DDL
+    ddlAddBtn.addEventListener('click', async () => {
         const task = ddlTaskInput.value.trim(); const date = ddlDateInput.value;
         if (!task || !date) { alert('任务和日期都要填！'); return; }
-        ddls.push({ task, date }); localStorage.setItem('my_ddls', JSON.stringify(ddls)); ddlTaskInput.value = ''; ddlDateInput.value = ''; renderDDLs();
+        
+        ddls.push({ task, date }); 
+        ddlAddBtn.innerText = '...'; ddlAddBtn.disabled = true;
+        await saveDDLsToCloud();
+        ddlAddBtn.innerText = '添加'; ddlAddBtn.disabled = false;
+        
+        ddlTaskInput.value = ''; ddlDateInput.value = ''; renderDDLs();
     });
 
     const ddlConfirmModal = document.getElementById('ddl-confirm-modal'); let pendingDDLIndex = null;
     window.confirmCompleteDDL = function(index) { pendingDDLIndex = index; ddlConfirmModal.classList.add('show'); }
     document.getElementById('ddl-cancel-btn').addEventListener('click', () => { ddlConfirmModal.classList.remove('show'); pendingDDLIndex = null; });
-    document.getElementById('ddl-confirm-btn').addEventListener('click', () => {
-        if (pendingDDLIndex !== null) { ddls.splice(pendingDDLIndex, 1); localStorage.setItem('my_ddls', JSON.stringify(ddls)); renderDDLs(); ddlConfirmModal.classList.remove('show'); pendingDDLIndex = null; }
+    
+    // 【核心接入云端】：完成/删除 DDL
+    document.getElementById('ddl-confirm-btn').addEventListener('click', async () => {
+        if (pendingDDLIndex !== null) { 
+            ddls.splice(pendingDDLIndex, 1); 
+            document.body.style.cursor = 'wait';
+            await saveDDLsToCloud();
+            document.body.style.cursor = 'default';
+            renderDDLs(); ddlConfirmModal.classList.remove('show'); pendingDDLIndex = null; 
+        }
     });
+    
+    // 初始化渲染页面
     changeWeek(0); renderDDLs(); 
 }
 
-//提醒模块的初始化
-function initRemindModule() {
+// =========================================================================
+// ================= 提醒模块的初始化 (全云端联机版) =======================
+// =========================================================================
+async function initRemindModule() {
     const remindList = document.getElementById('remind-list');
     if (!remindList) return;
     
@@ -602,7 +666,23 @@ function initRemindModule() {
     const remindFileInput = document.getElementById('remind-file-input'); const remindImgPreview = document.getElementById('remind-img-preview');
     const remindPreviewBox = document.getElementById('remind-img-preview-box'); const remindSubmitBtn = document.getElementById('remind-submit-btn');
     const remindRemoveImgBtn = document.getElementById('remind-remove-img');
-    let remindImageBase64 = null; let reminds = JSON.parse(localStorage.getItem('my_reminds')) || [];
+    let remindImageBase64 = null; 
+    
+    let reminds = []; let remindsDbId = null;
+
+    // 1. 从云端统一记忆体拉取数据
+    try {
+        const { data } = await supabase.from('app_data').select('*').eq('data_key', 'my_reminds').single();
+        if (data) { reminds = JSON.parse(data.data_value); remindsDbId = data.id; }
+    } catch(e) { console.log("备忘录：云端初次加载或暂无数据"); }
+
+    async function saveRemindsToCloud() {
+        if (remindsDbId) { await supabase.from('app_data').update({ data_value: JSON.stringify(reminds) }).eq('id', remindsDbId); } 
+        else {
+            const { data } = await supabase.from('app_data').insert({ data_key: 'my_reminds', data_value: JSON.stringify(reminds) }).select().single();
+            if(data) remindsDbId = data.id;
+        }
+    }
 
     remindFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -620,10 +700,17 @@ function initRemindModule() {
         });
     }
 
-    remindSubmitBtn.addEventListener('click', () => {
+    // 【核心接入云端】：添加备忘录
+    remindSubmitBtn.addEventListener('click', async () => {
         const text = remindTextInput.value.trim(); const time = remindTimeInput.value;
         if (!text || !time) { alert('填好内容和时间！'); return; }
-        reminds.push({ text: text, targetTime: time, image: remindImageBase64 }); localStorage.setItem('my_reminds', JSON.stringify(reminds));
+        
+        reminds.push({ text: text, targetTime: time, image: remindImageBase64 }); 
+        
+        remindSubmitBtn.innerText = '上传中...'; remindSubmitBtn.disabled = true;
+        await saveRemindsToCloud();
+        remindSubmitBtn.innerText = '设置备忘'; remindSubmitBtn.disabled = false;
+        
         remindTextInput.value = ''; remindTimeInput.value = ''; remindRemoveImgBtn.click(); renderReminds();
     });
 
@@ -631,9 +718,21 @@ function initRemindModule() {
     const remindConfirmModal = document.getElementById('remind-confirm-modal'); let pendingRemindDeleteIndex = null;
     window.showRemindConfirm = function(index) { pendingRemindDeleteIndex = index; remindConfirmModal.classList.add('show'); document.querySelectorAll('.remind-container .wa-dropdown-menu').forEach(m => m.classList.remove('show')); };
     document.getElementById('remind-modal-cancel').addEventListener('click', () => { remindConfirmModal.classList.remove('show'); pendingRemindDeleteIndex = null; });
-    document.getElementById('remind-modal-confirm').addEventListener('click', () => { if (pendingRemindDeleteIndex !== null) { reminds.splice(pendingRemindDeleteIndex, 1); localStorage.setItem('my_reminds', JSON.stringify(reminds)); renderReminds(); remindConfirmModal.classList.remove('show'); pendingRemindDeleteIndex = null; } });
+    
+    // 【核心接入云端】：删除备忘录
+    document.getElementById('remind-modal-confirm').addEventListener('click', async () => { 
+        if (pendingRemindDeleteIndex !== null) { 
+            reminds.splice(pendingRemindDeleteIndex, 1); 
+            document.body.style.cursor = 'wait';
+            await saveRemindsToCloud();
+            document.body.style.cursor = 'default';
+            renderReminds(); remindConfirmModal.classList.remove('show'); pendingRemindDeleteIndex = null; 
+        } 
+    });
 
     renderReminds();
+    
+    // 倒计时刷新器
     if (window.remindTimer) clearInterval(window.remindTimer);
     window.remindTimer = setInterval(() => {
         if(!document.querySelector('.countdown-row')) { clearInterval(window.remindTimer); return; }
