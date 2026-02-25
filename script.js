@@ -182,8 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // }
 
         // ================= 终极挂载：Hugging Face 全球 CDN 节点 =================
-// ================= 终极挂载：HF 国内高速公益镜像节点 =================
-// ================= 终极挂载：Vercel 穿透代理 =================
+        // ================= 终极挂载：HF 国内高速公益镜像节点 =================
+        // ================= 终极挂载：Vercel 穿透代理 =================
         // 不再直接连 HF，而是让 Vercel 帮我们中转
         const PROXY_BASE_URL = window.location.origin + '/api/music-proxy/';
 
@@ -257,17 +257,49 @@ function initWAModule() {
 
     waTextarea.addEventListener('input', () => { waWordCount.innerText = waTextarea.value.length; });
 
-    // 图片读取逻辑 (与原本保持一致)
+    // // 图片读取逻辑 (与原本保持一致)
+    // waImageInput.addEventListener('change', (e) => {
+    //     const file = e.target.files[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onload = (event) => {
+    //             currentImageBase64 = event.target.result;
+    //             waImagePreview.src = currentImageBase64;
+    //             waPreviewContainer.style.display = 'inline-block';
+    //             const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
+    //             if (syncWrapper) syncWrapper.style.display = 'block';
+    //         };
+    //         reader.readAsDataURL(file);
+    //     }
+    // });
+
+    // 【终极修复】：强制压缩 WA 留言板上传的图片，防止数据库撑爆！
     waImageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                currentImageBase64 = event.target.result;
-                waImagePreview.src = currentImageBase64;
-                waPreviewContainer.style.display = 'inline-block';
-                const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
-                if (syncWrapper) syncWrapper.style.display = 'block';
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width; let height = img.height;
+                    const MAX_SIZE = 800; // 强行把几千像素的原图压缩到 800 像素
+                    if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+                    else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 将图片转为 JPEG 格式，画质压缩到 70%
+                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    waImagePreview.src = currentImageBase64;
+                    
+                    const waPreviewContainer = document.getElementById('wa-image-preview-container');
+                    if(waPreviewContainer) waPreviewContainer.style.display = 'inline-block';
+                    const syncWrapper = document.getElementById('wa-sync-gallery-wrapper');
+                    if (syncWrapper) syncWrapper.style.display = 'block';
+                };
+                img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -300,7 +332,7 @@ function initWAModule() {
     async function loadWAFromCloud() {
         try {
             // 同时拉取 WA 动态和对应的评论
-            const { data: postsData, error: pErr } = await supabase.from('wa_posts').select('*').order('created_at', { ascending: false });
+            const { data: postsData, error: pErr } = await supabase.from('wa_posts').select('*').order('created_at', { ascending: false }).limit(20);
             const { data: commentsData, error: cErr } = await supabase.from('comments').select('*').eq('target_type', 'wa').order('created_at', { ascending: true });
             
             if (pErr || cErr) throw new Error("拉取失败");
