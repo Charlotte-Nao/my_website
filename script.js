@@ -1,9 +1,9 @@
 // =========================================================================
 // ==================== 云端数据库 Supabase 引擎点火 =========================
 // =========================================================================
-const SUPABASE_URL = 'https://gbwufsuebgumzxwgoyuk.supabase.co'; // 填入你的 Project URL
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdid3Vmc3VlYmd1bXp4d2dveXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5Njc5MjYsImV4cCI6MjA4NzU0MzkyNn0.YEyi6KJsKNgbU7VQKFSYcVWHXM5L03ha4oOK2LRrIqA'; // 填入你的 anon key
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var SUPABASE_URL = 'https://gbwufsuebgumzxwgoyuk.supabase.co'; 
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdid3Vmc3VlYmd1bXp4d2dveXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5Njc5MjYsImV4cCI6MjA4NzU0MzkyNn0.YEyi6KJsKNgbU7VQKFSYcVWHXM5L03ha4oOK2LRrIqA'; 
+var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =========================================================================
 // ==================== 终极魔法：Pjax 无刷新页面跳转 ====================
 // =========================================================================
