@@ -740,11 +740,39 @@ async function initRemindModule() {
             if(data) remindsDbId = data.id;
         }
     }
+    // 备忘对应照片压缩
+    // remindFileInput.addEventListener('change', (e) => {
+    //     const file = e.target.files[0];
+    //     if (file) { const reader = new FileReader(); reader.onload = (event) => { remindImageBase64 = event.target.result; remindImgPreview.src = remindImageBase64; remindPreviewBox.style.display = 'block'; }; reader.readAsDataURL(file); }
+    // });
 
+    // 【终极修复】：强制压缩备忘录上传的图片，保护 app_data 数据库！
     remindFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) { const reader = new FileReader(); reader.onload = (event) => { remindImageBase64 = event.target.result; remindImgPreview.src = remindImageBase64; remindPreviewBox.style.display = 'block'; }; reader.readAsDataURL(file); }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width; let height = img.height;
+                    const MAX_SIZE = 800; 
+                    if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+                    else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    remindImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    remindImgPreview.src = remindImageBase64;
+                    remindPreviewBox.style.display = 'block';
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     });
+
     remindRemoveImgBtn.addEventListener('click', () => { remindImageBase64 = null; remindImgPreview.src = ''; remindPreviewBox.style.display = 'none'; remindFileInput.value = ''; });
 
     function renderReminds() {
@@ -1048,7 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 核心：拉取云端相册
         async function loadPhotosFromCloud() {
             try {
-                const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: false });
+const { data, error } = await supabase.from('photos').select('*').order('created_at', { ascending: false }).limit(20);
                 if (error) throw error;
                 galleryPhotos = data.map(row => ({ db_id: row.id, src: row.image_url, caption: row.description }));
                 renderGallery();
