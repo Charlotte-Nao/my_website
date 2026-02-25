@@ -2,7 +2,7 @@
 // ==================== 云端数据库 Supabase 引擎点火 =========================
 // =========================================================================
 // 使用 Vercel 转发代理，绕过国内网络封锁
-const supabaseUrl = window.location.origin + '/api/database';
+var SUPABASE_URL = window.location.origin + '/api/database';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdid3Vmc3VlYmd1bXp4d2dveXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5Njc5MjYsImV4cCI6MjA4NzU0MzkyNn0.YEyi6KJsKNgbU7VQKFSYcVWHXM5L03ha4oOK2LRrIqA'; 
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =========================================================================
