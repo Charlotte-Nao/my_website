@@ -1,7 +1,8 @@
 // =========================================================================
 // ==================== 云端数据库 Supabase 引擎点火 =========================
 // =========================================================================
-var SUPABASE_URL = 'https://gbwufsuebgumzxwgoyuk.supabase.co'; 
+// 使用 Vercel 转发代理，绕过国内网络封锁
+const supabaseUrl = window.location.origin + '/api/database';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdid3Vmc3VlYmd1bXp4d2dveXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5Njc5MjYsImV4cCI6MjA4NzU0MzkyNn0.YEyi6KJsKNgbU7VQKFSYcVWHXM5L03ha4oOK2LRrIqA'; 
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // =========================================================================
@@ -182,16 +183,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // ================= 终极挂载：Hugging Face 全球 CDN 节点 =================
 // ================= 终极挂载：HF 国内高速公益镜像节点 =================
-        const HF_BASE_URL = 'https://hf-mirror.com/datasets/Charlotte-Nao/blue-rose-music/resolve/main/';
+// ================= 终极挂载：Vercel 穿透代理 =================
+        // 不再直接连 HF，而是让 Vercel 帮我们中转
+        const PROXY_BASE_URL = window.location.origin + '/api/music-proxy/';
 
         function loadSong(index) {
             const song = songs[index];
             titleEle.innerText = song.title; 
             artistEle.innerText = song.artist;
             
-            // 依然使用完美拼接魔法
-            coverImg.src = HF_BASE_URL + song.cover; 
-            audio.src = HF_BASE_URL + song.src;
+            // 使用 encodeURIComponent 处理中文路径，拼接到代理地址后面
+            // 原本是 music/xxx.mp3，现在变成 /api/music-proxy/music/xxx.mp3
+            const pathParts = song.src.split('/'); 
+            const encodedFileName = encodeURIComponent(pathParts[1]); 
+            
+            // 封面和音频都走代理
+            coverImg.src = PROXY_BASE_URL + pathParts[0] + '/' + encodeURIComponent(song.cover.split('/')[1]); 
+            audio.src = PROXY_BASE_URL + pathParts[0] + '/' + encodedFileName;
             
             document.querySelectorAll('.playlist li').forEach((li, i) => { 
                 li.classList.toggle('active', i === index); 

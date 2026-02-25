@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/database/:match*",
+      "destination": "https://gbwufsuebgumzxwgoyuk.supabase.co/:match*"
+    },
+    {
+      "source": "/api/music-proxy/:match*",
+      "destination": "https://huggingface.co/datasets/Charlotte-Nao/blue-rose-music/resolve/main/:match*"
+    }
+  ]
+}
