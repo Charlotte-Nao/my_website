@@ -1714,10 +1714,11 @@ h1, h2, h3, p, span, a, input, textarea, select, button, .wa-editor-box, .anime-
 /* 2. 暗黑模式下的专属全局变量与背景覆盖 */
 body.dark-mode {
     /* 【100%稳定】：用高级的午夜蓝紫渐变作为底色，绝对不消失 */
-    background: radial-gradient(circle at top right, #1a2035 0%, #0a0c15 100%) fixed;
+    /*background: radial-gradient(circle at top right, #1a2035 0%, #0a0c15 100%) fixed;*/
     
-    /* （可选）如果你自己下载了一张好看的夜景图放在文件夹里，可以把下面这行的注释取消掉： */
-     background: url('sky.png') no-repeat center center fixed; background-size: cover; 
+/* 终极背景：先显示深色底色兜底，然后无缝叠加 sky.jpg 图片 */
+    background: url('sky.jpg') no-repeat center center fixed, radial-gradient(circle at top right, #1a2035 0%, #0a0c15 100%) fixed;
+    background-size: cover;
     
     /* 将明亮的毛玻璃变暗，降低透明度，增加科技感 */
     --glass-bg: rgba(20, 25, 35, 0.85); 

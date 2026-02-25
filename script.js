@@ -93,6 +93,12 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+    
+    // ================= 终极魔法：静默预加载黑夜壁纸 =================
+    const preloadDarkBg = new Image();
+    // 关键点：只需写图片名字（相对路径），千万别带 D盘 前缀！
+    preloadDarkBg.src = "sky.jpg";
+
     // ================= 模块十一：Link Start 昼夜交替系统 =================
     const darkModeBtn = document.getElementById('dark-mode-btn');
     const linkStartAudio = document.getElementById('link-start-audio');
