@@ -1697,8 +1697,17 @@ function renderArchiveGrid(filter) {
         });
     });
 
-    // ================= 弹窗系统 =================
+// ================= 弹窗系统 =================
     const modal = document.getElementById('arc-detail-modal');
+    
+    // 【终极越狱魔法】：打破主容器的限制，把弹窗传送到网页的最外层！
+    if (modal && modal.parentNode !== document.body) {
+        // 清理 Pjax 跳转可能遗留的旧弹窗，防止重复
+        document.querySelectorAll('body > #arc-detail-modal').forEach(m => m.remove());
+        // 传送！
+        document.body.appendChild(modal);
+    }
+    
     let currentDetailId = null;
 
     function openArchiveModal(item) {

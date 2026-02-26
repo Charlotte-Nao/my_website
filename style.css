@@ -2591,25 +2591,25 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
     max-height: 90vh; /* 保证不撑破屏幕 */
 }
 
-/* 【核心魔法 2】：左侧取消固定像素，完全根据封面自身的长宽比来展示 */
+/* 左侧封面区：增加四周留白，缩小整体占比 */
 .arc-detail-left { 
     width: auto; 
-    max-width: 65vw; /* 给长图和宽图预留足够的空间，但不允许盖住右边的文字 */
+    max-width: 60vw; 
     background: transparent; 
-    padding: 30px; 
+    padding: 40px; /* 增加内边距，让图片不贴边 */
     display: flex; 
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
 }
 
+/* 封面图片：强行限制最大物理尺寸，拒绝傻大黑粗 */
 .arc-detail-cover { 
     width: auto; 
     height: auto; 
-    max-width: 100%; 
-    /* 限制图片最高为屏幕的 75%，防止非常细长的漫画切断显示 */
-    max-height: 75vh; 
-    object-fit: contain; /* 终极防切断指令：绝对完整显示全图！ */
+    max-width: 600px; /* 【缩小指令】：无论原图多大，宽度绝不超过 600px */
+    max-height: 55vh; /* 【缩小指令】：无论原图多高，高度绝不超过屏幕的 55% */
+    object-fit: contain; 
     border-radius: 12px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
     margin-bottom: 20px; 
@@ -2618,13 +2618,13 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
 
 .arc-detail-meta { text-align: center; }
 
-/* 右侧文本区：给予固定的排版宽度，保证阅读舒适 */
+/* 右侧文本区：配合图片稍微调窄，整体比例更和谐 */
 .arc-detail-right { 
-    width: 450px; /* 文字排版区的理想宽度 */
-    min-width: 320px;
+    width: 380px; /* 从 450px 收敛到 380px */
+    min-width: 300px;
     flex-shrink: 0; 
     padding: 40px; 
-    overflow-y: auto; /* 如果文字太长，右边会自己出现滚动条 */
+    overflow-y: auto; 
     border-left: 1px dashed rgba(0,0,0,0.1); 
 }
 
