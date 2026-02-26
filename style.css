@@ -2592,23 +2592,27 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
 }
 
 /* 左侧封面区：增加四周留白，缩小整体占比 */
+/* 左侧封面区：增加四周留白，缩小整体占比 */
 .arc-detail-left { 
     width: auto; 
     max-width: 60vw; 
+    min-width: 380px; /* 【新增魔法】：给竖版海报加一个保底宽度，让整个左侧框显得更宽敞大气 */
     background: transparent; 
-    padding: 40px; /* 增加内边距，让图片不贴边 */
+    padding: 40px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
 }
 
-/* 封面图片：强行限制最大物理尺寸，拒绝傻大黑粗 */
+/* 封面图片：精准控制横竖比例 */
 .arc-detail-cover { 
     width: auto; 
     height: auto; 
-    max-width: 600px; /* 【缩小指令】：无论原图多大，宽度绝不超过 600px */
-    max-height: 55vh; /* 【缩小指令】：无论原图多高，高度绝不超过屏幕的 55% */
+    /* 【横图的紧箍咒】：最宽不超过 600px，横图会在这里停下，保持现在的完美大小 */
+    max-width: 600px; 
+    /* 【竖图的解药】：高度上限从 55vh 解放到了 75vh，竖图可以向上尽情长高！ */
+    max-height: 75vh; 
     object-fit: contain; 
     border-radius: 12px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
