@@ -1001,12 +1001,12 @@ function initAboutRuntime() {
 
 // 1. 网页第一次从浏览器正常打开时执行
 document.addEventListener("DOMContentLoaded", () => {
-    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();;
+    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();initArchiveModule();
 });
 
 // 2. 无刷新跳转后重新唤醒模块
 document.addEventListener('PjaxContentLoaded', () => {
-    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();;
+    initRandomImage(); initWAModule(); initFPS(); initScheduleAndDDL(); initRemindModule(); initMessageBoard(); initAboutRuntime();initTreeOmamori();initArchiveModule();
 });
 
 // =========================================================================
@@ -1532,3 +1532,219 @@ function initTreeOmamori() {
             }
         }
     });}
+
+    // =========================================================================
+// ================= 模块十三：ACG 归档系统 (全云端联机版) =================
+// =========================================================================
+function initArchiveModule() {
+    const archiveGrid = document.getElementById('archive-grid');
+    if (!archiveGrid) return; // 如果不是归档页面，直接退出
+
+    const toggleBtn = document.getElementById('archive-toggle-editor');
+    const editorBox = document.getElementById('archive-editor-box');
+    const submitBtn = document.getElementById('arc-submit-btn');
+    
+    // 表单元素
+    const inputCategory = document.getElementById('arc-category');
+    const inputTitle = document.getElementById('arc-title');
+    const inputReview = document.getElementById('arc-review');
+    const coverInput = document.getElementById('arc-cover-input');
+    const extraInput = document.getElementById('arc-extra-input');
+    const previewArea = document.getElementById('arc-preview-area');
+    
+    let coverBase64 = null;
+    let extraImagesBase64 = []; // 存多张额外截图
+    let archivesData = [];
+
+    // 1. 编辑器展开/收起开关
+    toggleBtn.addEventListener('click', () => {
+        const isHidden = editorBox.style.display === 'none';
+        editorBox.style.display = isHidden ? 'block' : 'none';
+        toggleBtn.innerHTML = isHidden ? '<i class="fa-solid fa-angle-up"></i> 收起编辑器' : '<i class="fa-solid fa-pen-nib"></i> 封存新的记忆';
+    });
+
+    // 2. 超级画质压缩引擎 (复用你的 800px 算法)
+    const compressImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width; let height = img.height;
+                    const MAX_SIZE = 800; 
+                    if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
+                    else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // 压到 70% 画质，极其轻量
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // 3. 处理主封面图上传
+    coverInput.addEventListener('change', async (e) => {
+        if (e.target.files[0]) {
+            coverBase64 = await compressImage(e.target.files[0]);
+            renderPreviews();
+        }
+    });
+
+    // 4. 处理多张额外截图上传
+    extraInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        for (let file of files) {
+            if (extraImagesBase64.length >= 9) { // 限制最多 9 张截图防撑爆
+                alert("最多只能添加 9 张额外截图哦！"); break;
+            }
+            const base64 = await compressImage(file);
+            extraImagesBase64.push(base64);
+        }
+        renderPreviews();
+    });
+
+    // 5. 渲染预览区
+    function renderPreviews() {
+        previewArea.innerHTML = '';
+        if (coverBase64) {
+            previewArea.innerHTML += `
+                <div style="position:relative;">
+                    <span style="position:absolute; top:2px; left:2px; background:var(--theme-pink); color:white; font-size:10px; padding:2px 6px; border-radius:4px;">封面</span>
+                    <img src="${coverBase64}" style="height:80px; border-radius:4px; border:2px solid var(--theme-pink);">
+                </div>`;
+        }
+        extraImagesBase64.forEach((imgBase64, index) => {
+            previewArea.innerHTML += `
+                <div style="position:relative;">
+                    <img src="${imgBase64}" style="height:80px; border-radius:4px; border:1px solid #ccc;">
+                    <button onclick="removeExtraImage(${index})" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; font-size:10px;">X</button>
+                </div>`;
+        });
+    }
+
+    window.removeExtraImage = function(index) {
+        extraImagesBase64.splice(index, 1);
+        renderPreviews();
+    };
+
+    // ================= 云端拉取与展示 =================
+    async function loadArchivesFromCloud() {
+        try {
+            const { data, error } = await supabase.from('acg_archives').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            archivesData = data;
+            renderArchiveGrid('all'); // 默认显示全部
+        } catch (e) {
+            console.error("归档拉取失败:", e);
+        }
+    }
+
+    function renderArchiveGrid(filter) {
+        archiveGrid.innerHTML = '';
+        const filteredData = filter === 'all' ? archivesData : archivesData.filter(item => item.category === filter);
+        
+        filteredData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'arc-card';
+            card.innerHTML = `
+                <img src="${item.cover_image}" class="arc-card-cover">
+                <div class="arc-card-info">
+                    <div class="arc-card-title">${item.title}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="arc-badge badge-${item.category}">${item.category}</span>
+                        <span style="font-size:11px; color:#888;">${new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `;
+            // 点击卡片打开详情弹窗
+            card.addEventListener('click', () => openArchiveModal(item));
+            archiveGrid.appendChild(card);
+        });
+    }
+
+    // 分类过滤器点击事件
+    document.querySelectorAll('.arc-filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.arc-filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            renderArchiveGrid(e.target.getAttribute('data-filter'));
+        });
+    });
+
+    // ================= 弹窗系统 =================
+    const modal = document.getElementById('arc-detail-modal');
+    let currentDetailId = null;
+
+    function openArchiveModal(item) {
+        currentDetailId = item.id;
+        document.getElementById('arc-detail-cover').src = item.cover_image;
+        document.getElementById('arc-detail-title').innerText = item.title;
+        document.getElementById('arc-detail-meta').innerHTML = `
+            <div style="margin-bottom:10px;"><span class="arc-badge badge-${item.category}">${item.category}</span></div>
+            <div style="font-size:12px; color:#888;">入档时间：${new Date(item.created_at).toLocaleString()}</div>
+        `;
+        document.getElementById('arc-detail-review').innerText = item.review;
+        
+        // 渲染额外截图
+        const extraGallery = document.getElementById('arc-detail-extra-images');
+        extraGallery.innerHTML = '';
+        if (item.extra_images) {
+            const imagesArray = JSON.parse(item.extra_images);
+            imagesArray.forEach(imgSrc => {
+                extraGallery.innerHTML += `<img src="${imgSrc}" onclick="window.open('${imgSrc}')" title="点击查看原图">`;
+            });
+        }
+        
+        modal.classList.add('show');
+    }
+
+    document.getElementById('arc-detail-close').addEventListener('click', () => modal.classList.remove('show'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
+
+    // ================= 云端核心：发布与删除 =================
+    submitBtn.addEventListener('click', async () => {
+        const title = inputTitle.value.trim();
+        const category = inputCategory.value;
+        const review = inputReview.value.trim();
+
+        if (!title || !coverBase64) { alert("作品标题和封面图是必须要填的哦！"); return; }
+
+        submitBtn.innerText = "上传封存中..."; submitBtn.disabled = true;
+
+        try {
+            await supabase.from('acg_archives').insert([{ 
+                category: category, 
+                title: title, 
+                cover_image: coverBase64, 
+                extra_images: JSON.stringify(extraImagesBase64), 
+                review: review 
+            }]);
+            
+            // 清空表单
+            inputTitle.value = ''; inputReview.value = ''; coverBase64 = null; extraImagesBase64 = []; renderPreviews();
+            toggleBtn.click(); // 收起编辑器
+            await loadArchivesFromCloud(); // 重新拉取
+        } catch(e) {
+            alert("上传失败！如果传了太多图，请减少几张截图试试。");
+        } finally {
+            submitBtn.innerText = "发布归档"; submitBtn.disabled = false;
+        }
+    });
+
+    document.getElementById('arc-detail-delete').addEventListener('click', async () => {
+        if (confirm("真的要从档案馆中彻底抹除这部作品的记录吗？")) {
+            try {
+                await supabase.from('acg_archives').delete().eq('id', currentDetailId);
+                modal.classList.remove('show');
+                await loadArchivesFromCloud();
+            } catch(e) { alert("删除失败！"); }
+        }
+    });
+
+    // 网页加载时启动同步
+    loadArchivesFromCloud();
+}

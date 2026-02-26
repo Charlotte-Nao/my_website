@@ -1,3 +1,4 @@
 music/*.mp3
 music/*.jpg
-music/*.flac
+music/*.m4a
+flac/*.flac
