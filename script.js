@@ -1087,10 +1087,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     chosenDialogue = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)]; 
                 }
 
-                model.motion('', chosenIndex); 
+            model.motion('', chosenIndex); 
                 
-                // ================= 终极打断魔法 =================
-                // 1. 如果全局有正在播放的亚丝娜语音，直接强行按住暂停键！
+                // ================= 终极打断与播放魔法 =================
+                // 1. 如果有正在播放的语音，立刻强行按住暂停键！
                 if (window.currentAsunaAudio) {
                     window.currentAsunaAudio.pause();
                     window.currentAsunaAudio.currentTime = 0; 
@@ -1098,11 +1098,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 dialogBox.innerHTML = chosenDialogue.text;
 
-                // 2. 注入新语音：自己创建一个音频控制器，交由亚丝娜对口型
+                // 2. 注入新语音：使用浏览器原生 Audio API，绝对不会报错！
                 if (chosenDialogue.audio) {
                     window.currentAsunaAudio = new Audio(chosenDialogue.audio);
-                    // pixi-live2d-display 的隐藏神技：可以直接接收 Audio 对象并强制口型同步！
-                    model.speak(window.currentAsunaAudio); 
+                    // 加上 catch 护盾，就算文件没找到也不会卡死网页！
+                    window.currentAsunaAudio.play().catch(err => console.log('语音拦截或未找到:', err));
                 }
                 // ===============================================
 
@@ -1324,11 +1324,13 @@ function initTreeOmamori() {
 
 // 【打断并播放的终极版】：加入 audioUrl 参数
 // 【打断并播放的终极版】：加入 audioUrl 参数
+// 【打断并播放的终极版】：加入 audioUrl 参数
+// 【安全发声终极版】：加入 audioUrl 参数
         function showAsunaDialog(text, duration = 4500, audioUrl = null) {
             const dialogBox = document.getElementById('live2d-dialog');
             if (!dialogBox) return;
             
-            // ================= 核心打断：御守这边出声前，也强行掐断她之前在说的话！ =================
+            // 核心打断：出声前强行掐断之前的语音！
             if (window.currentAsunaAudio) {
                 window.currentAsunaAudio.pause();
                 window.currentAsunaAudio.currentTime = 0;
@@ -1341,10 +1343,10 @@ function initTreeOmamori() {
             void dialogBox.offsetWidth; 
             dialogBox.classList.add('show');
 
-            // 【呼叫亚丝娜全局声带】
-            if (audioUrl && window.asunaModel) {
+            // 【独立发声逻辑，不再依赖容易报错的 model.speak】
+            if (audioUrl) {
                 window.currentAsunaAudio = new Audio(audioUrl);
-                window.asunaModel.speak(window.currentAsunaAudio);
+                window.currentAsunaAudio.play().catch(err => console.log('语音拦截或未找到:', err));
             }
 
             if (window.asunaDialogTimer) clearTimeout(window.asunaDialogTimer);
@@ -1375,8 +1377,8 @@ function initTreeOmamori() {
             if (savedDate === todayStr && savedFateStr) {
                 state = 3; 
                 // ⚠️ 团长注意：如果这两句你也生成了，请把下面第三个参数补上，如 "live2d_models/asuna/voice/omamori_deny.mp3"
-                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500, "live2d_models/asuna/voice/omamori_deny.mp3");
-                
+                //showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500, "live2d_models/asuna/voice/omamori_deny.mp3");
+                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500);
                 dialogBox.style.top = 'auto';
                 dialogBox.style.bottom = 'calc(100% - 90px)'; 
 
@@ -1400,7 +1402,8 @@ function initTreeOmamori() {
 
             } else {
                 // ⚠️ 团长注意：这里是欢迎语，你如果有对应音频也补在第三个参数，如 "live2d_models/asuna/voice/omamori_greet.mp3"
-                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000, "live2d_models/asuna/voice/omamori_greet.mp3");
+                //showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000, "live2d_models/asuna/voice/omamori_greet.mp3");
+                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000);
                 state = 2;
             }
         } 
