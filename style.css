@@ -2113,10 +2113,12 @@ body.dark-mode .photo-caption {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
-/* 里面的图片：宽度100%，高度自适应！完美解决形状单一问题 */
+/* 里面的图片：固定高度，横版照片自动居中 */
 .photo-card img {
     width: 100%;
-    height: auto; /* 核心：按照原图比例自动伸缩高度！ */
+    height: 220px; /* 给所有照片框固定一个统一的高度 */
+    object-fit: contain; /* 【核心魔法】：横版照片绝对不会变形，且自动完美垂直居中！ */
+    background-color: #f4f5f7; /* 给上下留白的地方加一层高级的淡淡相纸底色 */
     border-radius: 4px;
     display: block;
 }
@@ -2126,10 +2128,16 @@ body.dark-mode .photo-caption {
     bottom: 12px;
     left: 0;
     width: 100%;
+    padding: 0 15px; /* 两边留出间距，防止文字贴边 */
     text-align: center;
     font-size: 13px;
     font-weight: bold;
     color: #555;
+    
+    /* 【极简魔法】：超过一行的文字，统统变成省略号！绝对不会再顶进照片里 */
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
 }
 
 .photo-card:hover {
