@@ -1702,7 +1702,10 @@ function initArchiveModule() {
         modal.classList.add('show');
     }
 
-    document.getElementById('arc-detail-close').addEventListener('click', () => modal.classList.remove('show'));
+    // 加上安全判定，找不到按钮就不执行，绝不报错
+    const closeBtn = document.getElementById('arc-detail-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('show'));
+    
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
 
     // ================= 云端核心：发布与删除 =================
@@ -1735,15 +1738,18 @@ function initArchiveModule() {
         }
     });
 
-    document.getElementById('arc-detail-delete').addEventListener('click', async () => {
-        if (confirm("真的要从档案馆中彻底抹除这部作品的记录吗？")) {
-            try {
-                await supabase.from('acg_archives').delete().eq('id', currentDetailId);
-                modal.classList.remove('show');
-                await loadArchivesFromCloud();
-            } catch(e) { alert("删除失败！"); }
+    const deleteBtn = document.getElementById('arc-detail-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (confirm("真的要从档案馆中彻底抹除这部作品的记录吗？")) {
+                    try {
+                        await supabase.from('acg_archives').delete().eq('id', currentDetailId);
+                        modal.classList.remove('show');
+                        await loadArchivesFromCloud();
+                    } catch(e) { alert("删除失败！"); }
+                }
+            });
         }
-    });
 
     // 网页加载时启动同步
     loadArchivesFromCloud();
