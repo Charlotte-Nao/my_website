@@ -2564,16 +2564,16 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
 /* 顺手把弹窗里横版图片可能显示不全的问题也修了 */
 .arc-detail-left { width: 320px; /* 把弹窗左边的封面区加宽 */ flex-shrink: 0; background: #f8f9fa; padding: 25px; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #eee; overflow-y: auto;}
 .arc-detail-cover { width: 100%; max-height: 400px; object-fit: contain; /* 横版在弹窗里绝对不裁剪！ */ border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-/* ================= 沉浸式阅读弹窗 (随封面比例自动撑开版) ================= */
+/* ================= 沉浸式阅读弹窗 (固定窗口 + 内部弹性推挤版) ================= */
 .arc-detail-box {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     
-    /* 【核心魔法 1】：绝对不写死宽度！让内部图片自动把盒子撑开！ */
-    width: fit-content; 
+    /* 【核心魔法 1】：总窗口大小死死锁住！ */
+    width: 1100px; 
     max-width: 95vw; 
-    height: fit-content; 
+    height: 700px;  /* 固定高度 */
     max-height: 90vh;
     
     border-radius: 20px; 
@@ -2581,38 +2581,35 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
     animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     border: 1px solid rgba(255, 255, 255, 0.8);
+    overflow: hidden; /* 防止内容溢出圆角 */
 }
 
 .arc-detail-layout { 
     display: flex; 
-    flex-direction: row; /* 默认左图右文 */
+    flex-direction: row; 
     width: 100%;
     height: 100%;
-    max-height: 90vh; /* 保证不撑破屏幕 */
 }
 
-/* 左侧封面区：增加四周留白，缩小整体占比 */
-/* 左侧封面区：增加四周留白，缩小整体占比 */
+/* 【核心魔法 2】：左侧高度拉满，宽度由里面的图片真实比例撑开！ */
 .arc-detail-left { 
-    width: auto; 
-    max-width: 60vw; 
-    min-width: 380px; /* 【新增魔法】：给竖版海报加一个保底宽度，让整个左侧框显得更宽敞大气 */
+    height: 100%; /* 高度填满 */
+    width: auto;  /* 宽度完全取决于图片 */
+    max-width: 60%; /* 兜底防线：横图再宽，也不能超过弹窗的 60%，把右边挤没 */
+    min-width: 320px; /* 兜底防线：竖图再窄，也不能窄于 320px */
     background: transparent; 
     padding: 40px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    justify-content: center; 
 }
 
-/* 封面图片：精准控制横竖比例 */
 .arc-detail-cover { 
+    /* 【图片自适应神技】：占据剩下的全部高度，宽度按比例自己缩放 */
+    flex: 1; 
+    min-height: 0; /* 极其重要：允许弹性缩小不撑破盒子 */
     width: auto; 
-    height: auto; 
-    /* 【横图的紧箍咒】：最宽不超过 600px，横图会在这里停下，保持现在的完美大小 */
-    max-width: 600px; 
-    /* 【竖图的解药】：高度上限从 55vh 解放到了 75vh，竖图可以向上尽情长高！ */
-    max-height: 75vh; 
+    max-width: 100%; 
     object-fit: contain; 
     border-radius: 12px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
@@ -2620,14 +2617,16 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
     display: block;
 }
 
-.arc-detail-meta { text-align: center; }
+.arc-detail-meta { 
+    flex-shrink: 0; /* 保证底部的时间标签不被压缩变形 */
+    text-align: center; 
+}
 
-/* 右侧文本区：配合图片稍微调窄，整体比例更和谐 */
+/* 【核心魔法 3】：右侧文字区，吃掉剩下的所有宽度！ */
 .arc-detail-right { 
-    width: 380px; /* 从 450px 收敛到 380px */
-    min-width: 300px;
-    flex-shrink: 0; 
-    padding: 40px; 
+    flex: 1; /* 这句代码价值千金，剩下的空间它全包了！ */
+    height: 100%;
+    padding: 40px 50px; 
     overflow-y: auto; 
     border-left: 1px dashed rgba(0,0,0,0.1); 
 }
@@ -2657,8 +2656,9 @@ body.dark-mode .arc-close-btn:hover { color: #ff7675; }
 
 /* ================= 屏幕太小时（手机/小窗口）的堆叠逻辑 ================= */
 @media (max-width: 900px) {
+    .arc-detail-box { height: 85vh; width: 95vw; }
     .arc-detail-layout { flex-direction: column; overflow-y: auto; }
-    .arc-detail-left { max-width: 100%; border-right: none; padding: 20px; }
-    .arc-detail-right { width: 100%; border-left: none; padding: 20px; }
-    .arc-detail-cover { max-height: 50vh; }
+    .arc-detail-left { max-width: 100%; height: auto; border-right: none; padding: 20px; }
+    .arc-detail-cover { max-height: 40vh; width: auto; }
+    .arc-detail-right { width: 100%; flex: none; border-left: none; padding: 20px; }
 }
