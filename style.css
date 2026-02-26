@@ -2564,126 +2564,97 @@ body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
 /* 顺手把弹窗里横版图片可能显示不全的问题也修了 */
 .arc-detail-left { width: 320px; /* 把弹窗左边的封面区加宽 */ flex-shrink: 0; background: #f8f9fa; padding: 25px; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #eee; overflow-y: auto;}
 .arc-detail-cover { width: 100%; max-height: 400px; object-fit: contain; /* 横版在弹窗里绝对不裁剪！ */ border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-/* ================= 沉浸式阅读弹窗 (超宽舒展重构版) ================= */
+/* ================= 沉浸式阅读弹窗 (随封面比例自动撑开版) ================= */
 .arc-detail-box {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     
-    /* 【核心解药 1】：疯狂扩建！从 850px 扩建到 1100px */
-    width: 1100px; 
+    /* 【核心魔法 1】：绝对不写死宽度！让内部图片自动把盒子撑开！ */
+    width: fit-content; 
     max-width: 95vw; 
-    height: 85vh; 
-    max-height: 850px;
+    height: fit-content; 
+    max-height: 90vh;
     
     border-radius: 20px; 
-    display: flex; 
-    flex-direction: column; 
     position: relative;
     animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    overflow: hidden;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
     border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .arc-detail-layout { 
     display: flex; 
-    height: 100%; 
-    width: 100%; 
+    flex-direction: row; /* 默认左图右文 */
+    width: 100%;
+    height: 100%;
+    max-height: 90vh; /* 保证不撑破屏幕 */
 }
 
-/* 【核心解药 2】：左侧封面区扩大到 50%，并彻底干掉丑陋的灰底！ */
+/* 【核心魔法 2】：左侧取消固定像素，完全根据封面自身的长宽比来展示 */
 .arc-detail-left { 
-    width: 50%; 
-    flex-shrink: 0; 
-    background: transparent; /* 剥夺灰底，回归纯净 */
-    padding: 40px; 
+    width: auto; 
+    max-width: 65vw; /* 给长图和宽图预留足够的空间，但不允许盖住右边的文字 */
+    background: transparent; 
+    padding: 30px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    justify-content: center; /* 让图片在左侧绝对居中 */
-    border-right: 1px dashed rgba(0,0,0,0.1); 
-    overflow-y: auto;
+    justify-content: center; 
 }
 
 .arc-detail-cover { 
-    width: 100%; 
-    /* 解除原来 400px 的封印，随图片自身比例放大 */
-    max-height: 100%; 
-    object-fit: contain; /* 绝对不裁剪，横竖图都完美展示！ */
+    width: auto; 
+    height: auto; 
+    max-width: 100%; 
+    /* 限制图片最高为屏幕的 75%，防止非常细长的漫画切断显示 */
+    max-height: 75vh; 
+    object-fit: contain; /* 终极防切断指令：绝对完整显示全图！ */
     border-radius: 12px; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
     margin-bottom: 20px; 
-    transition: transform 0.3s ease;
-}
-.arc-detail-cover:hover {
-    transform: scale(1.02);
+    display: block;
 }
 
-.arc-detail-meta {
-    text-align: center;
-}
+.arc-detail-meta { text-align: center; }
 
-/* 右侧文本区 */
+/* 右侧文本区：给予固定的排版宽度，保证阅读舒适 */
 .arc-detail-right { 
-    flex: 1; 
-    padding: 50px; 
-    overflow-y: auto; 
+    width: 450px; /* 文字排版区的理想宽度 */
+    min-width: 320px;
+    flex-shrink: 0; 
+    padding: 40px; 
+    overflow-y: auto; /* 如果文字太长，右边会自己出现滚动条 */
+    border-left: 1px dashed rgba(0,0,0,0.1); 
 }
 
-#arc-detail-title {
-    font-size: 30px;
-    font-weight: 900;
-    color: #333;
-    margin-bottom: 20px;
-}
+#arc-detail-title { font-size: 28px; font-weight: 900; color: #333; margin-bottom: 20px; }
+.arc-review-text { font-size: 15px; line-height: 1.8; color: #555; white-space: pre-wrap; margin-bottom: 30px; }
 
-.arc-review-text { 
-    font-size: 16px; 
-    line-height: 1.8; 
-    color: #555; 
-    white-space: pre-wrap; 
-    margin-bottom: 40px; 
-}
-
-.arc-extra-gallery { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-    gap: 15px; 
-}
-.arc-extra-gallery img { 
-    width: 100%; 
-    height: 110px; 
-    object-fit: cover; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    transition: transform 0.2s; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-}
+.arc-extra-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.arc-extra-gallery img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .arc-extra-gallery img:hover { transform: scale(1.05); }
 
-/* 关闭按钮优化 */
+/* 关闭按钮 */
 .arc-close-btn { 
-    position: absolute; 
-    top: 20px; 
-    right: 25px; 
-    font-size: 28px; 
-    color: #999; 
-    background: rgba(255,255,255,0.8); 
-    width: 40px; height: 40px; border-radius: 50%;
-    border: none; cursor: pointer; z-index: 10; transition: all 0.2s;
-    display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: absolute; top: 15px; right: 20px; font-size: 26px; color: #999; 
+    background: rgba(255,255,255,0.9); width: 36px; height: 36px; border-radius: 50%;
+    border: none; cursor: pointer; z-index: 10; transition: all 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 .arc-close-btn:hover { color: #ff7675; background: #fff; transform: scale(1.1); }
 
-/* 暗黑模式弹窗 */
-body.dark-mode .arc-detail-box { 
-    background: rgba(20, 25, 35, 0.95); 
-    border: 1px solid rgba(100,150,255,0.2); 
-}
-body.dark-mode .arc-detail-left { border-right-color: rgba(255,255,255,0.05); }
+/* 暗黑模式 */
+body.dark-mode .arc-detail-box { background: rgba(20, 25, 35, 0.95); border: 1px solid rgba(100,150,255,0.2); }
+body.dark-mode .arc-detail-right { border-left-color: rgba(255,255,255,0.05); }
 body.dark-mode #arc-detail-title { color: #dcdcdc; }
 body.dark-mode .arc-review-text { color: #aaa; }
 body.dark-mode .arc-close-btn { background: rgba(0,0,0,0.5); color: #ccc; }
 body.dark-mode .arc-close-btn:hover { color: #ff7675; }
+
+/* ================= 屏幕太小时（手机/小窗口）的堆叠逻辑 ================= */
+@media (max-width: 900px) {
+    .arc-detail-layout { flex-direction: column; overflow-y: auto; }
+    .arc-detail-left { max-width: 100%; border-right: none; padding: 20px; }
+    .arc-detail-right { width: 100%; border-left: none; padding: 20px; }
+    .arc-detail-cover { max-height: 50vh; }
+}

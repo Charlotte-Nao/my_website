@@ -1547,9 +1547,11 @@ function initArchiveModule() {
     // 表单元素
     const inputCategory = document.getElementById('arc-category');
     const inputTitle = document.getElementById('arc-title');
-    const inputReview = document.getElementById('arc-review');
 
-    const inputPlayTime = document.getElementById('arc-play-time');
+    const inputReview = document.getElementById('arc-review');
+    // 获取两个日历框
+    const inputStartDate = document.getElementById('arc-start-date');
+    const inputEndDate = document.getElementById('arc-end-date');
 
     const coverInput = document.getElementById('arc-cover-input');
     const extraInput = document.getElementById('arc-extra-input');
@@ -1736,7 +1738,16 @@ function renderArchiveGrid(filter) {
         const title = inputTitle.value.trim();
         const category = inputCategory.value;
         const review = inputReview.value.trim();
-        const playTime = inputPlayTime ? inputPlayTime.value.trim() : ''; // 获取时间
+        
+        // ================= 新增：智能拼接时间 =================
+        let playTime = '';
+        const startVal = inputStartDate ? inputStartDate.value : '';
+        const endVal = inputEndDate ? inputEndDate.value : '';
+        
+        if (startVal && endVal) playTime = `${startVal} ~ ${endVal}`;
+        else if (startVal) playTime = `${startVal} 开始`;
+        else if (endVal) playTime = `至 ${endVal} 结束`;
+        // ======================================================
 
         if (!title || !coverBase64) { alert("作品标题和封面图是必须要填的哦！"); return; }
 
@@ -1749,11 +1760,13 @@ function renderArchiveGrid(filter) {
                 cover_image: coverBase64, 
                 extra_images: JSON.stringify(extraImagesBase64), 
                 review: review,
-                play_time: playTime // 存入云端
+                play_time: playTime // 把拼接好的时间传给云端
             }]);
             
             inputTitle.value = ''; inputReview.value = ''; 
-            if(inputPlayTime) inputPlayTime.value = ''; // 清空时间框
+            // 清空日历框
+            if(inputStartDate) inputStartDate.value = ''; 
+            if(inputEndDate) inputEndDate.value = ''; 
             coverBase64 = null; extraImagesBase64 = []; renderPreviews();
 
             toggleBtn.click(); // 收起编辑器
