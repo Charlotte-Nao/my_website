@@ -93,7 +93,7 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     // ================= 终极魔法：静默预加载黑夜壁纸 =================
     const preloadDarkBg = new Image();
     // 关键点：只需写图片名字（相对路径），千万别带 D盘 前缀！
@@ -1024,42 +1024,94 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const motions = { fun: [0, 1, 2], sad: [3, 4, 5], sneeze: [6], surprise: [7, 8, 9], repeat: [10, 11, 12], angry: [13, 14, 15] };
             const headPool = [...motions.fun, ...motions.surprise]; const bodyPool = [...motions.angry, ...motions.sad, ...motions.sneeze, ...motions.repeat];
+            
+            // 1. 【核心新增】：把模型挂载到全局，让所有系统都能操控她说话！
+            window.asunaModel = model;
 
+            // 2. 注入带音频路径的终极台词库
             const headDialogues = [
-                "嘿嘿，今天也要一起努力哦！", "稍微有点害羞呢……不过，并不讨厌啦。", "怎么啦？突然这样摸人家的头……", "有什么开心的事吗？笑得这么灿烂。",
-                "既然你这么闲的话，要不要来帮我做三明治？", "今天天气真好呢，要一起去第 22 层的森林散步吗？", "辛苦啦！先把剑放下，喝杯热茶休息一下吧。",
-                "结衣刚才还在找你呢，不去陪陪她吗？", "摸头可是会让人长不高的！……不过，下不为例哦。", "嗯……这种感觉，很让人安心呢。",
-                "每次看到你平安回来，我就彻底放心了。", "好啦好啦，乖孩子乖孩子~（笑）"
+                { text: "嘿嘿，今天也要一起努力哦！", audio: "live2d_models/asuna/voice/head_01.mp3" },
+                { text: "稍微有点害羞呢……不过，并不讨厌啦。", audio: "live2d_models/asuna/voice/head_02.mp3" },
+                { text: "怎么啦？突然这样摸人家的头……", audio: "live2d_models/asuna/voice/head_03.mp3" },
+                { text: "有什么开心的事吗？笑得这么灿烂。", audio: "live2d_models/asuna/voice/head_04.mp3" },
+                { text: "既然你这么闲的话，要不要来帮我做三明治？", audio: "live2d_models/asuna/voice/head_05.mp3" },
+                { text: "今天天气真好呢，要一起去第 22 层的森林散步吗？", audio: "live2d_models/asuna/voice/head_06.mp3" },
+                { text: "辛苦啦！先把剑放下，喝杯热茶休息一下吧。", audio: "live2d_models/asuna/voice/head_07.mp3" },
+                { text: "结衣刚才还在找你呢，不去陪陪她吗？", audio: "live2d_models/asuna/voice/head_08.mp3" },
+                { text: "摸头可是会让人长不高的！……不过，下不为例哦。", audio: "live2d_models/asuna/voice/head_09.mp3" },
+                { text: "嗯……这种感觉，很让人安心呢。", audio: "live2d_models/asuna/voice/head_10.mp3" },
+                { text: "每次看到你平安回来，我就彻底放心了。", audio: "live2d_models/asuna/voice/head_11.mp3" },
+                { text: "好啦好啦，乖孩子乖孩子~（笑）", audio: "live2d_models/asuna/voice/head_12.mp3" }
             ];
+
             const chestDialogues = [
-                "呀！你在摸哪里啊，变态！", "再乱碰的话，我可要拔剑了哦！闪烁之光可不是吃素的！", "唔……你这算是性骚扰哦，小心我吃掉你的属性点！",
-                "你、你这家伙！快把手拿开啦！", "系统警告！这里可是圈内（安全区），不要做奇怪的动作！", "就算在 SAO 里没有痛觉，这种行为也是绝对禁止的！",
-                "副团长的威严都要被你破坏了啦！给我去墙角反省一下！", "信不信我用八连击的『星屑飞溅』把你打飞出艾恩葛朗特？", "……你再这样，明天的早餐就只有发硬的黑面包了哦！"
+                { text: "呀！你在摸哪里啊，变态！", audio: "live2d_models/asuna/voice/chest_01.mp3" },
+                { text: "再乱碰的话，我可要拔剑了哦！闪烁之光可不是吃素的！", audio: "live2d_models/asuna/voice/chest_02.mp3" },
+                { text: "唔……你这算是性骚扰哦，小心我吃掉你的属性点！", audio: "live2d_models/asuna/voice/chest_03.mp3" },
+                { text: "你、你这家伙！快把手拿开啦！", audio: "live2d_models/asuna/voice/chest_04.mp3" },
+                { text: "系统警告！这里可是圈内（安全区），不要做奇怪的动作！", audio: "live2d_models/asuna/voice/chest_05.mp3" },
+                { text: "就算在 SAO 里没有痛觉，这种行为也是绝对禁止的！", audio: "live2d_models/asuna/voice/chest_06.mp3" },
+                { text: "副团长的威严都要被你破坏了啦！给我去墙角反省一下！", audio: "live2d_models/asuna/voice/chest_07.mp3" },
+                { text: "信不信我用八连击的『星屑飞溅』把你打飞出艾恩葛朗特？", audio: "live2d_models/asuna/voice/chest_08.mp3" },
+                { text: "……你再这样，明天的早餐就只有发硬的黑面包了哦！", audio: "live2d_models/asuna/voice/chest_09.mp3" }
             ];
+
             const bodyDialogues = [
-                "真是的，好好工作啦，不要老是发呆！", "就算你这样一直戳我，我也不会马上给你做料理的啦！", "阿嚏！……难道是有人在说我坏话？",
-                "别闹了啦，马上就要到楼层 Boss 的攻略会议时间了！", "哎呀，戳那里有点痒啦~", "肚子饿了吗？我包里还有之前用杂烩兔做好的特级炖肉哦。",
-                "不要一直盯着我看啦，我的 HP 又没掉。", "今天你的状态不错嘛，有没有去野外好好练级？", "喂喂，身为攻略组的一员，可不要在这种地方偷懒啊！",
-                "武器耐久度还好吗？回城的时候记得去莉兹的店里修理一下哦。", "如果累了的话，就在长椅上稍微睡一会儿吧，我帮你看着系统警报。"
+                { text: "真是的，好好工作啦，不要老是发呆！", audio: "live2d_models/asuna/voice/body_01.mp3" },
+                { text: "就算你这样一直戳我，我也不会马上给你做料理的啦！", audio: "live2d_models/asuna/voice/body_02.mp3" },
+                { text: "阿嚏！……难道是有人在说我坏话？", audio: "live2d_models/asuna/voice/body_03.mp3" },
+                { text: "别闹了啦，马上就要到楼层 Boss 的攻略会议时间了！", audio: "live2d_models/asuna/voice/body_04.mp3" },
+                { text: "哎呀，戳那里有点痒啦~", audio: "live2d_models/asuna/voice/body_05.mp3" },
+                { text: "肚子饿了吗？我包里还有之前用杂烩兔做好的特级炖肉哦。", audio: "live2d_models/asuna/voice/body_06.mp3" },
+                { text: "不要一直盯着我看啦，我的 HP 又没掉。", audio: "live2d_models/asuna/voice/body_07.mp3" },
+                { text: "今天你的状态不错嘛，有没有去野外好好练级？", audio: "live2d_models/asuna/voice/body_08.mp3" },
+                { text: "喂喂，身为攻略组的一员，可不要在这种地方偷懒啊！", audio: "live2d_models/asuna/voice/body_09.mp3" },
+                { text: "武器耐久度还好吗？回城的时候记得去莉兹的店里修理一下哦。", audio: "live2d_models/asuna/voice/body_10.mp3" },
+                { text: "如果累了的话，就在长椅上稍微睡一会儿吧，我帮你看着系统警报。", audio: "live2d_models/asuna/voice/body_11.mp3" }
             ];
 
             live2dCanvas.addEventListener('click', (event) => {
                 const rect = live2dCanvas.getBoundingClientRect(); const clickY = event.clientY - rect.top; const relativeY = clickY / rect.height; 
-                let chosenIndex; let spokenText = "";
+                let chosenIndex; 
+                let chosenDialogue; // 变成对象
 
-                if (relativeY < 0.45) { chosenIndex = headPool[Math.floor(Math.random() * headPool.length)]; spokenText = headDialogues[Math.floor(Math.random() * headDialogues.length)];
-                } else if (relativeY >= 0.45 && relativeY < 0.65) { chosenIndex = motions.angry[Math.floor(Math.random() * motions.angry.length)]; spokenText = chestDialogues[Math.floor(Math.random() * chestDialogues.length)];
-                } else { const otherBodyPool = [...motions.sad, ...motions.sneeze, ...motions.repeat]; chosenIndex = otherBodyPool[Math.floor(Math.random() * otherBodyPool.length)]; spokenText = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)]; }
+                if (relativeY < 0.45) { 
+                    chosenIndex = headPool[Math.floor(Math.random() * headPool.length)]; 
+                    chosenDialogue = headDialogues[Math.floor(Math.random() * headDialogues.length)];
+                } else if (relativeY >= 0.45 && relativeY < 0.65) { 
+                    chosenIndex = motions.angry[Math.floor(Math.random() * motions.angry.length)]; 
+                    chosenDialogue = chestDialogues[Math.floor(Math.random() * chestDialogues.length)];
+                } else { 
+                    const otherBodyPool = [...motions.sad, ...motions.sneeze, ...motions.repeat]; 
+                    chosenIndex = otherBodyPool[Math.floor(Math.random() * otherBodyPool.length)]; 
+                    chosenDialogue = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)]; 
+                }
 
-                model.motion('', chosenIndex); dialogBox.innerHTML = spokenText;
+                model.motion('', chosenIndex); 
+                
+                // ================= 终极打断魔法 =================
+                // 1. 如果全局有正在播放的亚丝娜语音，直接强行按住暂停键！
+                if (window.currentAsunaAudio) {
+                    window.currentAsunaAudio.pause();
+                    window.currentAsunaAudio.currentTime = 0; 
+                }
+                
+                dialogBox.innerHTML = chosenDialogue.text;
 
-                // ！！！【核心防御 1】：任何时候主动点她，强行把气泡按回默认高度！
+                // 2. 注入新语音：自己创建一个音频控制器，交由亚丝娜对口型
+                if (chosenDialogue.audio) {
+                    window.currentAsunaAudio = new Audio(chosenDialogue.audio);
+                    // pixi-live2d-display 的隐藏神技：可以直接接收 Audio 对象并强制口型同步！
+                    model.speak(window.currentAsunaAudio); 
+                }
+                // ===============================================
+
                 dialogBox.style.top = '0px';
                 dialogBox.style.bottom = 'auto';
-
                 dialogBox.classList.remove('show'); void dialogBox.offsetWidth; dialogBox.classList.add('show');
                 clearTimeout(dialogTimer); dialogTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500); 
             });
+
             console.log("🌸 亚丝娜已完美装载入无刷新底层系统！");
         }).catch(err => { console.error("❌ 模型加载失败:", err); });
     }
@@ -1231,34 +1283,31 @@ function initTreeOmamori() {
 
     if (!treeSystem || !charm) return;
 
-// 命运采样库 (终极老黄历版：二次元 + 慢生活 + 极客日常)
+// 命运采样库 (终极挂载音频版)
     const fateLibrary = [
-        // --- 🏆 欧皇降临 (大吉) ---
-        { rank: "大吉", motto: "十连双黄！今天的你被系统和幸运女神同时眷顾了！", good: "单抽奇迹", bad: "头铁下毒池", item: "抽卡玄学歌" },
-        { rank: "大吉", motto: "玄学护体！明明一行代码都没改，Bug却奇迹般地自己消失了！", good: "一次编译通过", bad: "乱动祖传代码", item: "初音未来手办" },
-        { rank: "大吉", motto: "艾恩葛朗特万里无云，今天点外卖竟然被老板多送了一个鸡腿！", good: "尝试新口味", bad: "吃白水煮面", item: "冰镇可乐" },
-        
-        // --- 🌟 快乐源泉 (中吉) ---
-        { rank: "中吉", motto: "随机点开的新番意外地神仙，恭喜发现一部宝藏神作！", good: "一口气追平进度", bad: "手贱搜百度百科", item: "薯片与爆米花" },
-        { rank: "中吉", motto: "就像在看慢综艺《出发》一样，今天什么都不做，发呆也是一件正经事。", good: "漫无目的地散步", bad: "设定严密的计划表", item: "微风与阳光" },
-        { rank: "中吉", motto: "喜欢的角色今天存活确认，不仅没发便当，甚至还有高光时刻！", good: "疯狂截图做壁纸", bad: "在弹幕里剧透", item: "速效救心丸" },
-        { rank: "中吉", motto: "烙铁温度刚刚好，焊点圆润饱满，今天你是实验室里的‘焊武帝’。", good: "飞线修复老主板", bad: "带电插拔排线", item: "松香与吸锡器" },
-
-        // --- 🍀 小确幸 (小吉) ---
-        { rank: "小吉", motto: "出门正好赶上绿灯，踩着点上车，今天的时间管理大师就是你。", good: "随性出门转转", bad: "宅在家里发霉", item: "准时的手表" },
-        { rank: "小吉", motto: "OpenCV 识别到了奇怪的人脸？别怕，大概率只是墙上的海报反光。", good: "调参找到最优解", bad: "大半夜一个人测试", item: "偏振镜片" },
-        { rank: "小吉", motto: "今天撸到的猫咪脾气特别好，甚至主动翻肚皮给你摸。", good: "准备猫条加餐", bad: "试图给猫洗澡", item: "毛茸茸的触感" },
-
-        // --- 🍵 佛系躺平 (平安 / 末吉) ---
-        { rank: "平安", motto: "平凡的日常，才是最连续的奇迹。今天不如早点洗洗睡吧。", good: "躺平放空大脑", bad: "深夜网抑云", item: "柔软的抱枕" },
-        { rank: "平安", motto: "音乐播放器随机到了一首很久没听的动漫神曲，DNA 狠狠地动了！", good: "跟着副歌哼唱", bad: "外放打扰别人", item: "高解析度耳机" },
-        { rank: "末吉", motto: "今天没有拯救世界的任务，只要按时吃满三顿饭就算是巨大成功。", good: "吃一顿好的", bad: "疯狂立Flag", item: "豪华版泡面" },
-        { rank: "末吉", motto: "虽然天气很好，但在屋里拉上窗帘躺着，也是对周末的一种尊重。", good: "裹紧小被子", bad: "强迫自己打扫卫生", item: "懒人沙发" },
-
-        // --- 💦 高能预警 (凶 - 喜剧效果) ---
-        { rank: "小凶", motto: "前方高能预警！今天上网极易惨遭剧透，建议断网保平安。", good: "关掉手机睡大觉", bad: "点开热搜和评论区", item: "物理断网器" },
-        { rank: "小凶", motto: "墨菲定律生效中：当你想给别人演示功能时，它一定会报错死机。", good: "提前录好演示视频", bad: "骄傲地疯狂点击", item: "理直气壮的甩锅借口" },
-        { rank: "凶", motto: "不小心点开了手机前置摄像头，被自己刚睡醒的素颜暴击了。", good: "假装什么都没发生", bad: "直视镜头三十秒", item: "最高级美颜滤镜" }
+        // 大吉
+        { rank: "大吉", motto: "十连双黄！今天的你被系统和幸运女神同时眷顾了！", good: "单抽奇迹", bad: "头铁下毒池", item: "抽卡玄学歌", audio: "live2d_models/asuna/voice/omamori_01.mp3" },
+        { rank: "大吉", motto: "玄学护体！明明一行代码都没改，Bug却奇迹般地自己消失了！", good: "一次编译通过", bad: "乱动祖传代码", item: "初音未来手办", audio: "live2d_models/asuna/voice/omamori_02.mp3" },
+        { rank: "大吉", motto: "艾恩葛朗特万里无云，今天点外卖竟然被老板多送了一个鸡腿！", good: "尝试新口味", bad: "吃白水煮面", item: "冰镇可乐", audio: "live2d_models/asuna/voice/omamori_03.mp3" },
+        // 中吉
+        { rank: "中吉", motto: "随机点开的新番意外地神仙，恭喜发现一部宝藏神作！", good: "一口气追平进度", bad: "手贱搜百度百科", item: "薯片与爆米花", audio: "live2d_models/asuna/voice/omamori_04.mp3" },
+        { rank: "中吉", motto: "就像在看日常番一样，今天什么都不做，发呆也是一件正经事。", good: "漫无目的地散步", bad: "设定严密的计划表", item: "微风与阳光", audio: "live2d_models/asuna/voice/omamori_05.mp3" },
+        { rank: "中吉", motto: "喜欢的角色今天存活确认，不仅没发便当，甚至还有高光时刻！", good: "疯狂截图做壁纸", bad: "在弹幕里剧透", item: "速效救心丸", audio: "live2d_models/asuna/voice/omamori_06.mp3" },
+        { rank: "中吉", motto: "烙铁温度刚刚好，焊点圆润饱满，今天你是实验室里的‘焊武帝’。", good: "飞线修复老主板", bad: "带电插拔排线", item: "松香与吸锡器", audio: "live2d_models/asuna/voice/omamori_07.mp3" },
+        // 小吉
+        { rank: "小吉", motto: "进门刚好踩着上课铃，踩着点上课，今天的时间管理大师就是你。", good: "随性出门转转", bad: "宅在家里发霉", item: "准时的手表", audio: "live2d_models/asuna/voice/omamori_08.mp3" },
+        { rank: "小吉", motto: "OpenCV 识别到了奇怪的人脸？别怕，大概率只是墙上的海报反光。", good: "调参找到最优解", bad: "大半夜一个人测试", item: "偏振镜片", audio: "live2d_models/asuna/voice/omamori_09.mp3" },
+        { rank: "小吉", motto: "今天撸到的猫咪脾气特别好，甚至主动翻肚皮给你摸。", good: "准备猫条加餐", bad: "试图给猫洗澡", item: "毛茸茸的触感", audio: "live2d_models/asuna/voice/omamori_10.mp3" },
+        // 平安
+        { rank: "平安", motto: "平凡的日常，才是最连续的奇迹。今天不如早点洗洗睡吧。", good: "躺平放空大脑", bad: "深夜网抑云", item: "柔软的抱枕", audio: "live2d_models/asuna/voice/omamori_11.mp3" },
+        { rank: "平安", motto: "音乐播放器随机到了一首很久没听的动漫神曲，DNA 狠狠地动了！", good: "跟着副歌哼唱", bad: "外放打扰别人", item: "高解析度耳机", audio: "live2d_models/asuna/voice/omamori_12.mp3" },
+        // 末吉
+        { rank: "末吉", motto: "今天没有拯救世界的任务，只要按时吃满三顿饭就算是巨大成功。", good: "吃一顿好的", bad: "疯狂立Flag", item: "豪华版泡面", audio: "live2d_models/asuna/voice/omamori_13.mp3" },
+        { rank: "末吉", motto: "虽然天气很好，但在屋里拉上窗帘躺着，也是对周末的一种尊重。", good: "裹紧小被子", bad: "强迫自己打扫卫生", item: "懒人沙发", audio: "live2d_models/asuna/voice/omamori_14.mp3" },
+        // 小凶 / 凶
+        { rank: "小凶", motto: "前方高能预警！今天上网极易惨遭剧透，建议断网保平安。", good: "关掉手机睡大觉", bad: "点开热搜和评论区", item: "物理断网器", audio: "live2d_models/asuna/voice/omamori_15.mp3" },
+        { rank: "小凶", motto: "墨菲定律生效中：当你想给别人演示功能时，它一定会报错死机。", good: "提前录好演示视频", bad: "骄傲地疯狂点击", item: "理直气壮的甩锅借口", audio: "live2d_models/asuna/voice/omamori_16.mp3" },
+        { rank: "凶", motto: "Git 提交备注随手乱写，刚 push 完就发现没法回头修改。", good: "假装什么都没发生", bad: "直视镜头三十秒", item: "最高级美颜滤镜", audio: "live2d_models/asuna/voice/omamori_17.mp3" }
     ];
 
     // 状态机：0=缩在屏幕外, 1=树枝已伸出, 2=亚丝娜已搭话, 3=正在出结果锁死
@@ -1273,17 +1322,30 @@ function initTreeOmamori() {
     charm.addEventListener('click', (e) => {
         const dialogBox = document.getElementById('live2d-dialog');
 
-        function showAsunaDialog(text, duration = 4500) {
+// 【打断并播放的终极版】：加入 audioUrl 参数
+// 【打断并播放的终极版】：加入 audioUrl 参数
+        function showAsunaDialog(text, duration = 4500, audioUrl = null) {
+            const dialogBox = document.getElementById('live2d-dialog');
             if (!dialogBox) return;
             
-            // 每次说话前，强制气泡回到普通的短文本位置（把 5px 换成你刚才满意的数值）
+            // ================= 核心打断：御守这边出声前，也强行掐断她之前在说的话！ =================
+            if (window.currentAsunaAudio) {
+                window.currentAsunaAudio.pause();
+                window.currentAsunaAudio.currentTime = 0;
+            }
+
             dialogBox.style.top = '0px'; 
             dialogBox.style.bottom = 'auto';
-            
             dialogBox.innerHTML = text;
             dialogBox.classList.remove('show');
             void dialogBox.offsetWidth; 
             dialogBox.classList.add('show');
+
+            // 【呼叫亚丝娜全局声带】
+            if (audioUrl && window.asunaModel) {
+                window.currentAsunaAudio = new Audio(audioUrl);
+                window.asunaModel.speak(window.currentAsunaAudio);
+            }
 
             if (window.asunaDialogTimer) clearTimeout(window.asunaDialogTimer);
             window.asunaDialogTimer = setTimeout(() => {
@@ -1302,81 +1364,74 @@ function initTreeOmamori() {
             return;
         }
 
-        // 加上点击御守时的微微晃动特效
         charm.style.transform = "scale(0.9) rotate(-5deg)";
         setTimeout(() => charm.style.transform = "", 200);
 
-        // 获取今天的日期字符串，例如 "2026/2/24"
         const todayStr = new Date().toLocaleDateString(); 
         const savedDate = localStorage.getItem('omamori_date');
         const savedFateStr = localStorage.getItem('omamori_result');
 
         if (state === 1) {
-            // 【新逻辑】：检查今天是不是已经抽过了
             if (savedDate === todayStr && savedFateStr) {
-                // 今天抽过了，进入拦截状态
                 state = 3; 
-                // 亚丝娜的专属傲娇提醒语音
-                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500);
+                // ⚠️ 团长注意：如果这两句你也生成了，请把下面第三个参数补上，如 "live2d_models/asuna/voice/omamori_deny.mp3"
+                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500, "live2d_models/asuna/voice/omamori_deny.mp3");
                 
-                // ！！！【修复重点】：因为这句话也很长，所以说完后立刻把它也拉升到长文本的高度！
                 dialogBox.style.top = 'auto';
-                dialogBox.style.bottom = 'calc(100% - 90px)'; // 这里用你之前调好的数值
+                dialogBox.style.bottom = 'calc(100% - 90px)'; 
 
-                // 等她说完上面那段话后，再展示缓存的运势结果
                 setTimeout(() => {
                     const fate = JSON.parse(savedFateStr);
                     const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
                     
-                    showAsunaDialog(speech, 6000); 
+                    // 传入命运对应的独享音频
+                    showAsunaDialog(speech, 6000, fate.audio); 
                     
-                    // 把气泡往上拉，适配长文本（把 60px 换成你刚才满意的长文本偏移数值）
                     dialogBox.style.top = 'auto';
                     dialogBox.style.bottom = 'calc(100% - 90px)'; 
                     
                     setTimeout(() => {
                         treeSystem.classList.add('closed');
                         state = 0; 
-                        // 重置气泡位置
                         dialogBox.style.top = '5px'; 
                         dialogBox.style.bottom = 'auto';
                     }, 6000);
                 }, 4500);
 
             } else {
-                // 今天还没抽过，走正常的询问流程
-                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000);
+                // ⚠️ 团长注意：这里是欢迎语，你如果有对应音频也补在第三个参数，如 "live2d_models/asuna/voice/omamori_greet.mp3"
+                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000, "live2d_models/asuna/voice/omamori_greet.mp3");
                 state = 2;
             }
         } 
         else if (state === 2) {
             state = 3; 
-            showAsunaDialog("正在向系统提交祈愿请求...", 2000);
+            showAsunaDialog("正在向系统提交祈愿请求...", 2000); // 这句短暂过渡可以不配音
             
             setTimeout(() => {
                 const fate = fateLibrary[Math.floor(Math.random() * fateLibrary.length)];
                 
-                // 【新逻辑】：出签的瞬间，把日期和结果永久刻印在 LocalStorage 里
                 localStorage.setItem('omamori_date', todayStr);
                 localStorage.setItem('omamori_result', JSON.stringify(fate));
                 
                 const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
                 
-                showAsunaDialog(speech, 6000); 
+                // 传入命运对应的独享音频
+                showAsunaDialog(speech, 6000, fate.audio); 
                 
-                // 拉升气泡（把 60px 换成你的数值）
                 dialogBox.style.top = 'auto';
                 dialogBox.style.bottom = 'calc(100% - 90px)'; 
                 
                 setTimeout(() => {
                     treeSystem.classList.add('closed');
                     state = 0; 
-                    // 重置气泡位置
                     dialogBox.style.top = '5px'; 
                     dialogBox.style.bottom = 'auto';
                 }, 6000);
             }, 1000);
         }
+
+
     });
 
     // ---------------------------------------------------------
