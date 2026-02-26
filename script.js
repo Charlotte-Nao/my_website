@@ -1548,6 +1548,9 @@ function initArchiveModule() {
     const inputCategory = document.getElementById('arc-category');
     const inputTitle = document.getElementById('arc-title');
     const inputReview = document.getElementById('arc-review');
+
+    const inputPlayTime = document.getElementById('arc-play-time');
+
     const coverInput = document.getElementById('arc-cover-input');
     const extraInput = document.getElementById('arc-extra-input');
     const previewArea = document.getElementById('arc-preview-area');
@@ -1661,16 +1664,22 @@ function renderArchiveGrid(filter) {
             img.src = item.cover_image;
             // ==========================================================
 
+        // 兼容旧数据：如果没有填时间段，就显示入档时间
+            const displayTime = item.play_time || new Date(item.created_at).toLocaleDateString();
+
             card.innerHTML = `
-                <img src="${item.cover_image}" class="arc-card-cover">
+                <div class="arc-card-cover-wrapper">
+                    <img src="${item.cover_image}" class="arc-card-cover">
+                </div>
                 <div class="arc-card-info">
                     <div class="arc-card-title">${item.title}</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="arc-badge badge-${item.category}">${item.category}</span>
-                        <span style="font-size:11px; color:var(--text-main); font-weight:bold;">${new Date(item.created_at).toLocaleDateString()}</span>
+                        <span style="font-size:11px; color:var(--text-light); font-weight:bold;">${displayTime}</span>
                     </div>
                 </div>
             `;
+
             // 点击卡片打开详情弹窗
             card.addEventListener('click', () => openArchiveModal(item));
             archiveGrid.appendChild(card);
@@ -1694,10 +1703,13 @@ function renderArchiveGrid(filter) {
         currentDetailId = item.id;
         document.getElementById('arc-detail-cover').src = item.cover_image;
         document.getElementById('arc-detail-title').innerText = item.title;
+
+        const displayTime = item.play_time || new Date(item.created_at).toLocaleDateString();
         document.getElementById('arc-detail-meta').innerHTML = `
             <div style="margin-bottom:10px;"><span class="arc-badge badge-${item.category}">${item.category}</span></div>
-            <div style="font-size:12px; color:#888;">入档时间：${new Date(item.created_at).toLocaleString()}</div>
+            <div style="font-size:12px; color:#888;">记忆时段：${displayTime}</div>
         `;
+
         document.getElementById('arc-detail-review').innerText = item.review;
         
         // 渲染额外截图
@@ -1720,9 +1732,11 @@ function renderArchiveGrid(filter) {
 
     // ================= 云端核心：发布与删除 =================
     submitBtn.addEventListener('click', async () => {
+
         const title = inputTitle.value.trim();
         const category = inputCategory.value;
         const review = inputReview.value.trim();
+        const playTime = inputPlayTime ? inputPlayTime.value.trim() : ''; // 获取时间
 
         if (!title || !coverBase64) { alert("作品标题和封面图是必须要填的哦！"); return; }
 
@@ -1734,11 +1748,14 @@ function renderArchiveGrid(filter) {
                 title: title, 
                 cover_image: coverBase64, 
                 extra_images: JSON.stringify(extraImagesBase64), 
-                review: review 
+                review: review,
+                play_time: playTime // 存入云端
             }]);
             
-            // 清空表单
-            inputTitle.value = ''; inputReview.value = ''; coverBase64 = null; extraImagesBase64 = []; renderPreviews();
+            inputTitle.value = ''; inputReview.value = ''; 
+            if(inputPlayTime) inputPlayTime.value = ''; // 清空时间框
+            coverBase64 = null; extraImagesBase64 = []; renderPreviews();
+
             toggleBtn.click(); // 收起编辑器
             await loadArchivesFromCloud(); // 重新拉取
         } catch(e) {

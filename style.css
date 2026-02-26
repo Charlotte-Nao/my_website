@@ -2493,56 +2493,68 @@ body.dark-mode .arc-filter-btn.active { background: var(--theme-blue); color: wh
 /* 基础卡片样式 */
 .arc-card {
     background: #fff; 
-    border-radius: 16px; /* 更圆润的高级边角 */
-    overflow: hidden; /* 【核心解药】：绝对强制切掉内部元素的直角，完美贴合圆角！ */
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
     cursor: pointer; 
-    position: relative; 
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transform: translateZ(0); /* Safari 浏览器的圆角溢出防线 */
+    display: flex;
+    flex-direction: column; /* 让图片在上，白底在下正常排布 */
 }
 
-/* 横版海报的专属样式：直接横跨两列！ */
-.arc-card-horizontal {
-    grid-column: span 2;
+/* 封面图包裹区，给透明图片打底 */
+.arc-card-cover-wrapper {
+    width: 100%;
+    height: 280px; 
+    background: #f4f5f7; /* 高级相纸留白底色 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
-.arc-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 35px rgba(0,0,0,0.15); z-index: 2; }
-
-/* 封面图：高度调大到 300px */
+/* 封面图本体：绝对不裁剪！ */
 .arc-card-cover { 
     width: 100%; 
-    height: 300px; 
-    object-fit: cover; 
-    display: block; 
-    background: #f0f0f0; 
+    height: 100%; 
+    object-fit: contain; /* 【终极解药】：强制完整显示整张图，绝不吃掉画面的任何一个角！ */
     transition: transform 0.5s ease;
 }
 .arc-card:hover .arc-card-cover { transform: scale(1.05); }
 
-/* 底部信息框：蜕变为顶级磨砂玻璃！ */
+/* 底部信息框：回归纯净白底，不再遮挡图片 */
 .arc-card-info { 
     padding: 15px; 
-    background: rgba(255, 255, 255, 0.35); /* 半透明白底 */
-    backdrop-filter: blur(12px) saturate(150%); /* 高级毛玻璃模糊 */
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    position: absolute; 
-    bottom: 0; 
+    background: #fff; 
     width: 100%; 
-    border-top: 1px solid rgba(255, 255, 255, 0.5); /* 顶部加一道亮晶晶的高光线 */
 }
 
-.arc-card-title { font-size: 15px; font-weight: 900; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
-.arc-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
-.badge-番剧 { background: #ff7675; } .badge-Galgame { background: #a29bfe; } .badge-漫画 { background: #74b9ff; }
-
-/* 暗黑模式海报卡片 */
-body.dark-mode .arc-card { border: 1px solid rgba(100, 150, 255, 0.2); }
-body.dark-mode .arc-card-info { 
-    background: rgba(15, 20, 35, 0.5); /* 暗色毛玻璃 */
-    border-top: 1px solid rgba(100, 150, 255, 0.2); 
+/* 修复弹窗：左侧自适应放宽，横竖版封神都不截断 */
+.arc-detail-left { 
+    width: 40%; 
+    max-width: 380px; 
+    min-width: 250px; 
+    flex-shrink: 0; 
+    background: #f8f9fa; 
+    padding: 25px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    border-right: 1px solid #eee; 
+    overflow-y: auto;
 }
-body.dark-mode .arc-card-title { color: #dcdcdc; }
+.arc-detail-cover { 
+    width: 100%; 
+    max-height: 400px; 
+    object-fit: contain; /* 弹窗内也绝对不裁剪 */
+    border-radius: 4px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    margin-bottom: 20px; 
+}
+
+/* 暗黑模式适配 */
+body.dark-mode .arc-card-cover-wrapper { background: rgba(10, 15, 25, 0.8); }
+body.dark-mode .arc-card-info { background: rgba(30, 40, 60, 0.95); }
 
 /* 修复手机端横排撑破屏幕的问题 */
 @media (max-width: 600px) {
