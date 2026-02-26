@@ -137,19 +137,28 @@ document.addEventListener("DOMContentLoaded", () => {
             // 4. 【极度高能】：与亚丝娜联动！
             const dialogBox = document.getElementById('live2d-dialog');
             if (dialogBox) {
-                // 根据不同模式，亚丝娜说不同的话
+                // 【新增护盾 1】：切换昼夜时，强行打断亚丝娜正在说的其他语音
+                if (window.currentAsunaAudio) {
+                    window.currentAsunaAudio.pause();
+                    window.currentAsunaAudio.currentTime = 0;
+                }
+                // 【新增护盾 2】：更新全局交互 ID，防止御守的幽灵计时器捣乱
+                window.asunaInteractionId = Date.now();
+
+                // 根据不同模式，亚丝娜说不同的话 (既然不配音，就只展示文字)
                 dialogBox.innerHTML = currentlyDark 
                     ? "✨ Link Start！已接入暗黑网络，潜行请注意安全哦~" 
                     : "☀️ Log Out！欢迎回到现实世界，今天辛苦啦！";
                 
-                // 用代码魔法强制重新触发气泡的 CSS 动画
                 dialogBox.classList.remove('show');
                 void dialogBox.offsetWidth; 
                 dialogBox.classList.add('show');
                 
-                // 4.5秒后自动关掉气泡
-                setTimeout(() => { dialogBox.classList.remove('show'); }, 4500);
+                // 【核心修复】：统一移交给全局气泡管家，稳稳当当显示 4.5 秒！
+                clearTimeout(window.globalBubbleTimer);
+                window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500);
             }
+
         });
     }
     const globalPlayer = document.getElementById('global-player');
@@ -1070,10 +1079,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 { text: "如果累了的话，就在长椅上稍微睡一会儿吧，我帮你看着系统警报。", audio: "live2d_models/asuna/voice/body_11.mp3" }
             ];
 
-            live2dCanvas.addEventListener('click', (event) => {
+live2dCanvas.addEventListener('click', (event) => {
+                // ================= 【新增】：全局打断锁！=================
+                // 只要点了亚丝娜，立刻生成新 ID，掐断御守的一切延时！
+                window.asunaInteractionId = Date.now();
+                // =======================================================
+
                 const rect = live2dCanvas.getBoundingClientRect(); const clickY = event.clientY - rect.top; const relativeY = clickY / rect.height; 
                 let chosenIndex; 
-                let chosenDialogue; // 变成对象
+                let chosenDialogue; 
 
                 if (relativeY < 0.45) { 
                     chosenIndex = headPool[Math.floor(Math.random() * headPool.length)]; 
@@ -1087,10 +1101,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     chosenDialogue = bodyDialogues[Math.floor(Math.random() * bodyDialogues.length)]; 
                 }
 
-            model.motion('', chosenIndex); 
+                model.motion('', chosenIndex); 
                 
-                // ================= 终极打断与播放魔法 =================
-                // 1. 如果有正在播放的语音，立刻强行按住暂停键！
                 if (window.currentAsunaAudio) {
                     window.currentAsunaAudio.pause();
                     window.currentAsunaAudio.currentTime = 0; 
@@ -1098,18 +1110,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 dialogBox.innerHTML = chosenDialogue.text;
 
-                // 2. 注入新语音：使用浏览器原生 Audio API，绝对不会报错！
                 if (chosenDialogue.audio) {
                     window.currentAsunaAudio = new Audio(chosenDialogue.audio);
-                    // 加上 catch 护盾，就算文件没找到也不会卡死网页！
                     window.currentAsunaAudio.play().catch(err => console.log('语音拦截或未找到:', err));
                 }
-                // ===============================================
 
                 dialogBox.style.top = '0px';
                 dialogBox.style.bottom = 'auto';
                 dialogBox.classList.remove('show'); void dialogBox.offsetWidth; dialogBox.classList.add('show');
-                clearTimeout(dialogTimer); dialogTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500); 
+                
+                // ================= 【修改】：统一使用全局气泡管家 =================
+                clearTimeout(window.globalBubbleTimer); 
+                
+                if (chosenDialogue.audio && window.currentAsunaAudio) {
+                    window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500); 
+                    window.currentAsunaAudio.addEventListener('loadedmetadata', () => {
+                        clearTimeout(window.globalBubbleTimer);
+                        const actualTime = window.currentAsunaAudio.duration * 1000 + 500; 
+                        window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, Math.max(4500, actualTime));
+                    });
+                } else {
+                    window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, 4500); 
+                }
             });
 
             console.log("🌸 亚丝娜已完美装载入无刷新底层系统！");
@@ -1317,20 +1339,22 @@ function initTreeOmamori() {
     // 核心 1：御守自身的点击流转逻辑
     // ---------------------------------------------------------
  // ---------------------------------------------------------
-    // 核心 1：御守自身的点击流转逻辑 (带每日单抽限制与本地记忆)
+ // 状态机：改用全局变量，防止局部变量造成的幽灵状态
+    window.omamoriState = 0;
+
+    // ---------------------------------------------------------
+    // 核心 1：御守自身的点击流转逻辑 
     // ---------------------------------------------------------
     charm.addEventListener('click', (e) => {
+        // 【新增核心】：记录本次交互的唯一ID
+        window.asunaInteractionId = Date.now();
+        const currentId = window.asunaInteractionId; 
+        
         const dialogBox = document.getElementById('live2d-dialog');
 
-// 【打断并播放的终极版】：加入 audioUrl 参数
-// 【打断并播放的终极版】：加入 audioUrl 参数
-// 【打断并播放的终极版】：加入 audioUrl 参数
-// 【安全发声终极版】：加入 audioUrl 参数
         function showAsunaDialog(text, duration = 4500, audioUrl = null) {
-            const dialogBox = document.getElementById('live2d-dialog');
             if (!dialogBox) return;
             
-            // 核心打断：出声前强行掐断之前的语音！
             if (window.currentAsunaAudio) {
                 window.currentAsunaAudio.pause();
                 window.currentAsunaAudio.currentTime = 0;
@@ -1343,28 +1367,33 @@ function initTreeOmamori() {
             void dialogBox.offsetWidth; 
             dialogBox.classList.add('show');
 
-            // 【独立发声逻辑，不再依赖容易报错的 model.speak】
             if (audioUrl) {
                 window.currentAsunaAudio = new Audio(audioUrl);
                 window.currentAsunaAudio.play().catch(err => console.log('语音拦截或未找到:', err));
             }
 
-            if (window.asunaDialogTimer) clearTimeout(window.asunaDialogTimer);
-            window.asunaDialogTimer = setTimeout(() => {
-                dialogBox.classList.remove('show');
-            }, duration);
+            // 【修改】：统一使用全局气泡管家
+            clearTimeout(window.globalBubbleTimer);
+            
+            if (audioUrl && window.currentAsunaAudio) {
+                window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, duration); 
+                window.currentAsunaAudio.addEventListener('loadedmetadata', () => {
+                    clearTimeout(window.globalBubbleTimer);
+                    const actualTime = window.currentAsunaAudio.duration * 1000 + 500; 
+                    window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, Math.max(duration, actualTime));
+                });
+            } else {
+                window.globalBubbleTimer = setTimeout(() => { dialogBox.classList.remove('show'); }, duration);
+            }
         }
 
-        if (state === 0) {
+        if (window.omamoriState === 0) {
             treeSystem.classList.remove('closed');
-            state = 1;
+            window.omamoriState = 1;
             return; 
         }
 
-        if (!dialogBox) {
-            alert("亚丝娜还在赶来的路上，请稍等一秒再点哦！");
-            return;
-        }
+        if (!dialogBox) { alert("亚丝娜还在赶来的路上，请稍等一秒再点哦！"); return; }
 
         charm.style.transform = "scale(0.9) rotate(-5deg)";
         setTimeout(() => charm.style.transform = "", 200);
@@ -1373,91 +1402,133 @@ function initTreeOmamori() {
         const savedDate = localStorage.getItem('omamori_date');
         const savedFateStr = localStorage.getItem('omamori_result');
 
-        if (state === 1) {
+        if (window.omamoriState === 1) {
             if (savedDate === todayStr && savedFateStr) {
-                state = 3; 
-                // ⚠️ 团长注意：如果这两句你也生成了，请把下面第三个参数补上，如 "live2d_models/asuna/voice/omamori_deny.mp3"
-                //showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500, "live2d_models/asuna/voice/omamori_deny.mp3");
-                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500);
+                window.omamoriState = 3; 
+                showAsunaDialog("真是的，祈愿这种事一天只能做一次啦！太贪心的话可是会被系统弹出违规警告的哦~<br>不过……既然你没记住，我就破例再帮你调取一次今天的日志吧！", 4500, "live2d_models/asuna/voice/omamori_deny.mp3");
                 dialogBox.style.top = 'auto';
                 dialogBox.style.bottom = 'calc(100% - 90px)'; 
 
-                setTimeout(() => {
+                const showHistoryFateAction = () => {
+                    // 【拦截器】：如果这期间你点了别的地方，ID 已经变了，立刻放弃执行这句台词！
+                    if (window.asunaInteractionId !== currentId) return; 
+                    
                     const fate = JSON.parse(savedFateStr);
                     const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
                     
-                    // 传入命运对应的独享音频
                     showAsunaDialog(speech, 6000, fate.audio); 
-                    
                     dialogBox.style.top = 'auto';
                     dialogBox.style.bottom = 'calc(100% - 90px)'; 
                     
-                    setTimeout(() => {
+                    const closeTreeAction = () => {
+                        if (window.asunaInteractionId !== currentId) return; // 【拦截器】
                         treeSystem.classList.add('closed');
-                        state = 0; 
+                        window.omamoriState = 0; 
                         dialogBox.style.top = '5px'; 
                         dialogBox.style.bottom = 'auto';
-                    }, 6000);
-                }, 4500);
+                    };
+                    
+                    if (window.currentAsunaAudio) {
+                        window.currentAsunaAudio.addEventListener('loadedmetadata', () => {
+                            if (window.asunaInteractionId !== currentId) return; // 【拦截器】
+                            const actualTime = window.currentAsunaAudio.duration * 1000 + 500;
+                            setTimeout(closeTreeAction, Math.max(6000, actualTime));
+                        });
+                        window.currentAsunaAudio.addEventListener('error', () => {
+                            if (window.asunaInteractionId !== currentId) return; 
+                            setTimeout(closeTreeAction, 6000);
+                        });
+                    } else {
+                        setTimeout(closeTreeAction, 6000);
+                    }
+                };
+
+                if (window.currentAsunaAudio) {
+                    window.currentAsunaAudio.addEventListener('loadedmetadata', () => {
+                        if (window.asunaInteractionId !== currentId) return; // 【拦截器】
+                        const denyTime = window.currentAsunaAudio.duration * 1000 + 500;
+                        setTimeout(showHistoryFateAction, Math.max(4500, denyTime));
+                    });
+                    window.currentAsunaAudio.addEventListener('error', () => {
+                        if (window.asunaInteractionId !== currentId) return;
+                        setTimeout(showHistoryFateAction, 4500);
+                    });
+                } else {
+                    setTimeout(showHistoryFateAction, 4500);
+                }
 
             } else {
-                // ⚠️ 团长注意：这里是欢迎语，你如果有对应音频也补在第三个参数，如 "live2d_models/asuna/voice/omamori_greet.mp3"
-                //showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000, "live2d_models/asuna/voice/omamori_greet.mp3");
-                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000);
-                state = 2;
+                showAsunaDialog("✨ 咦？这里挂着一个御守！<br>要来看看今天的运势吗？再点一下试试看吧~", 5000, "live2d_models/asuna/voice/omamori_greet.mp3");
+                window.omamoriState = 2;
             }
         } 
-        else if (state === 2) {
-            state = 3; 
-            showAsunaDialog("正在向系统提交祈愿请求...", 2000); // 这句短暂过渡可以不配音
+        else if (window.omamoriState === 2) {
+            window.omamoriState = 3; 
+            showAsunaDialog("正在向系统提交祈愿请求...", 2000); 
             
             setTimeout(() => {
-                const fate = fateLibrary[Math.floor(Math.random() * fateLibrary.length)];
+                if (window.asunaInteractionId !== currentId) return; // 【拦截器】
                 
+                const fate = fateLibrary[Math.floor(Math.random() * fateLibrary.length)];
                 localStorage.setItem('omamori_date', todayStr);
                 localStorage.setItem('omamori_result', JSON.stringify(fate));
                 
                 const speech = `今日运势：【${fate.rank}】<br>“${fate.motto}”<br>宜：${fate.good}<br>忌：${fate.bad}<br>幸运物：${fate.item}`;
                 
-                // 传入命运对应的独享音频
                 showAsunaDialog(speech, 6000, fate.audio); 
-                
                 dialogBox.style.top = 'auto';
                 dialogBox.style.bottom = 'calc(100% - 90px)'; 
                 
-                setTimeout(() => {
+                const closeTreeAction = () => {
+                    if (window.asunaInteractionId !== currentId) return; // 【拦截器】
                     treeSystem.classList.add('closed');
-                    state = 0; 
+                    window.omamoriState = 0; 
                     dialogBox.style.top = '5px'; 
                     dialogBox.style.bottom = 'auto';
-                }, 6000);
+                };
+                
+                if (window.currentAsunaAudio) {
+                    window.currentAsunaAudio.addEventListener('loadedmetadata', () => {
+                        if (window.asunaInteractionId !== currentId) return; // 【拦截器】
+                        const actualTime = window.currentAsunaAudio.duration * 1000 + 500;
+                        setTimeout(closeTreeAction, Math.max(6000, actualTime));
+                    });
+                    window.currentAsunaAudio.addEventListener('error', () => {
+                        if (window.asunaInteractionId !== currentId) return;
+                        setTimeout(closeTreeAction, 6000);
+                    });
+                } else {
+                    setTimeout(closeTreeAction, 6000);
+                }
             }, 1000);
         }
-
-
     });
 
     // ---------------------------------------------------------
-    // 核心 2：全局防误触侦测 (点击外部自动收回)
+    // 核心 2：全局防误触侦测 (无情打断版)
     // ---------------------------------------------------------
     document.addEventListener('click', (e) => {
-        // 如果树枝本来就是收回状态，直接无视
-        if (state === 0) return;
+        if (window.omamoriState === 0) return;
 
-        // 【精细判定】：点击的区域是否属于“御守系统”或“亚丝娜互动区”
         const isClickOmamori = e.target.closest('#omamori-tree-system');
-        const isClickAsuna = e.target.closest('#live2d-container') || e.target.closest('#live2d-dialog');
 
-        // 如果既不是点御守，也不是点亚丝娜，那就立刻收回树枝！
-        if (!isClickOmamori && !isClickAsuna) {
-            treeSystem.classList.add('closed');
-            state = 0; // 重置交互状态
+        // 只要你点的不是御守本体，树枝统统收回，所有动作统统掐断！
+        if (!isClickOmamori) {
+            // ================= 终极杀手锏 =================
+            window.asunaInteractionId = Date.now(); // 强制发个新 ID，让后面排队的语音全部自杀
+            // ==============================================
             
-            // 【细节满分】：如果亚丝娜正在聊抽签的事，点击别处也会顺便把气泡关掉，防止出戏
+            treeSystem.classList.add('closed');
+            window.omamoriState = 0; 
+            
             const dialogBox = document.getElementById('live2d-dialog');
-            if (dialogBox && (dialogBox.innerHTML.includes('运势') || dialogBox.innerHTML.includes('祈愿请求'))) {
+            // 只清理属于抽签的文本，如果气泡已经被亚丝娜的其他动作（比如你刚刚摸了她的头）覆盖了，就不关气泡
+            if (dialogBox && (dialogBox.innerHTML.includes('运势') || dialogBox.innerHTML.includes('祈愿') || dialogBox.innerHTML.includes('一天只能做一次') || dialogBox.innerHTML.includes('挂着一个御守'))) {
                 dialogBox.classList.remove('show');
+                if (window.currentAsunaAudio) {
+                    window.currentAsunaAudio.pause();
+                    window.currentAsunaAudio.currentTime = 0;
+                }
             }
         }
-    });
-}
+    });}
