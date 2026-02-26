@@ -593,15 +593,16 @@ color: #ffffff;
 
 /* ================= 二次元居中弹窗样式 ================= */
 .anime-modal-overlay {
-    display: none; /* 默认隐藏 */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3); /* 半透明黑底 */
-    backdrop-filter: blur(3px); /* 弹窗时背景微微模糊 */
-    z-index: 99999;
+    background: rgba(0, 0, 0, 0.3); 
+    backdrop-filter: blur(3px); 
+    /* 【核心镇压】：7个9，绝对凌驾于侧边栏之上！ */
+    z-index: 9999999 !important; 
     justify-content: center;
     align-items: center;
 }
@@ -2480,24 +2481,77 @@ body.dark-mode .arc-input { background: rgba(10, 15, 25, 0.6) !important; color:
 body.dark-mode .arc-filter-btn { background: rgba(20,30,50,0.6); color: #aaa; border-color: rgba(100,150,255,0.2); }
 body.dark-mode .arc-filter-btn.active { background: var(--theme-blue); color: white; }
 
-/* 海报墙网格布局 */
-.archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
-.arc-card {
-    background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    cursor: pointer; position: relative; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* 海报墙网格布局：引入 dense 密集填充魔法！ */
+.archive-grid { 
+    display: grid; 
+    /* 卡片基础宽度放大到 220px，视觉更舒展 */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+    gap: 25px; 
+    grid-auto-flow: dense; /* 【核心魔法】：空隙自动填补，完美兼容横竖版混合！ */
 }
-.arc-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 15px 30px rgba(0,0,0,0.15); z-index: 2; }
-.arc-card-cover { width: 100%; height: 260px; object-fit: cover; display: block; background: #f0f0f0; }
-.arc-card-info { padding: 12px; background: rgba(255,255,255,0.95); position: absolute; bottom: 0; width: 100%; backdrop-filter: blur(5px); }
-.arc-card-title { font-size: 14px; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-.arc-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; color: white; font-weight: bold; }
+
+/* 基础卡片样式 */
+.arc-card {
+    background: #fff; 
+    border-radius: 16px; /* 更圆润的高级边角 */
+    overflow: hidden; /* 【核心解药】：绝对强制切掉内部元素的直角，完美贴合圆角！ */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    cursor: pointer; 
+    position: relative; 
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateZ(0); /* Safari 浏览器的圆角溢出防线 */
+}
+
+/* 横版海报的专属样式：直接横跨两列！ */
+.arc-card-horizontal {
+    grid-column: span 2;
+}
+
+.arc-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 35px rgba(0,0,0,0.15); z-index: 2; }
+
+/* 封面图：高度调大到 300px */
+.arc-card-cover { 
+    width: 100%; 
+    height: 300px; 
+    object-fit: cover; 
+    display: block; 
+    background: #f0f0f0; 
+    transition: transform 0.5s ease;
+}
+.arc-card:hover .arc-card-cover { transform: scale(1.05); }
+
+/* 底部信息框：蜕变为顶级磨砂玻璃！ */
+.arc-card-info { 
+    padding: 15px; 
+    background: rgba(255, 255, 255, 0.35); /* 半透明白底 */
+    backdrop-filter: blur(12px) saturate(150%); /* 高级毛玻璃模糊 */
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    position: absolute; 
+    bottom: 0; 
+    width: 100%; 
+    border-top: 1px solid rgba(255, 255, 255, 0.5); /* 顶部加一道亮晶晶的高光线 */
+}
+
+.arc-card-title { font-size: 15px; font-weight: 900; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+.arc-badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
 .badge-番剧 { background: #ff7675; } .badge-Galgame { background: #a29bfe; } .badge-漫画 { background: #74b9ff; }
 
 /* 暗黑模式海报卡片 */
-body.dark-mode .arc-card { background: rgba(30, 40, 60, 0.85); border: 1px solid rgba(100, 150, 255, 0.2); }
-body.dark-mode .arc-card-info { background: rgba(15, 20, 35, 0.95); }
+body.dark-mode .arc-card { border: 1px solid rgba(100, 150, 255, 0.2); }
+body.dark-mode .arc-card-info { 
+    background: rgba(15, 20, 35, 0.5); /* 暗色毛玻璃 */
+    border-top: 1px solid rgba(100, 150, 255, 0.2); 
+}
 body.dark-mode .arc-card-title { color: #dcdcdc; }
 
+/* 修复手机端横排撑破屏幕的问题 */
+@media (max-width: 600px) {
+    .arc-card-horizontal { grid-column: span 1; }
+}
+
+/* 顺手把弹窗里横版图片可能显示不全的问题也修了 */
+.arc-detail-left { width: 320px; /* 把弹窗左边的封面区加宽 */ flex-shrink: 0; background: #f8f9fa; padding: 25px; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #eee; overflow-y: auto;}
+.arc-detail-cover { width: 100%; max-height: 400px; object-fit: contain; /* 横版在弹窗里绝对不裁剪！ */ border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
 /* 沉浸式阅读弹窗 */
 .arc-detail-box {
     background: #fff; width: 850px; max-width: 90vw; height: 80vh; max-height: 700px;

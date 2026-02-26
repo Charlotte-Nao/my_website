@@ -1643,20 +1643,28 @@ function initArchiveModule() {
         }
     }
 
-    function renderArchiveGrid(filter) {
-        archiveGrid.innerHTML = '';
-        const filteredData = filter === 'all' ? archivesData : archivesData.filter(item => item.category === filter);
-        
         filteredData.forEach((item, index) => {
             const card = document.createElement('div');
-            card.className = 'arc-card';
+            card.className = 'arc-card'; // 默认是竖版单格
+
+            // ================= 核心魔法：智能侦测图像比例 =================
+            const img = new Image();
+            img.onload = () => {
+                // 如果宽度明显大于高度 (横版 CG/海报)，给它加上双倍宽度的专属类名！
+                if (img.width > img.height * 1.1) {
+                    card.classList.add('arc-card-horizontal');
+                }
+            };
+            img.src = item.cover_image;
+            // ==========================================================
+
             card.innerHTML = `
                 <img src="${item.cover_image}" class="arc-card-cover">
                 <div class="arc-card-info">
                     <div class="arc-card-title">${item.title}</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="arc-badge badge-${item.category}">${item.category}</span>
-                        <span style="font-size:11px; color:#888;">${new Date(item.created_at).toLocaleDateString()}</span>
+                        <span style="font-size:11px; color:var(--text-main); font-weight:bold;">${new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                 </div>
             `;
@@ -1664,6 +1672,7 @@ function initArchiveModule() {
             card.addEventListener('click', () => openArchiveModal(item));
             archiveGrid.appendChild(card);
         });
+
     }
 
     // 分类过滤器点击事件
