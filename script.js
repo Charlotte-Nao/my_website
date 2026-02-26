@@ -1642,7 +1642,10 @@ function initArchiveModule() {
             console.error("归档拉取失败:", e);
         }
     }
-
+function renderArchiveGrid(filter) {
+        archiveGrid.innerHTML = '';
+        const filteredData = filter === 'all' ? archivesData : archivesData.filter(item => item.category === filter);
+        
         filteredData.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'arc-card'; // 默认是竖版单格
@@ -1672,7 +1675,6 @@ function initArchiveModule() {
             card.addEventListener('click', () => openArchiveModal(item));
             archiveGrid.appendChild(card);
         });
-
     }
 
     // 分类过滤器点击事件
@@ -1711,7 +1713,6 @@ function initArchiveModule() {
         modal.classList.add('show');
     }
 
-    // 加上安全判定，找不到按钮就不执行，绝不报错
     const closeBtn = document.getElementById('arc-detail-close');
     if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('show'));
     
@@ -1748,17 +1749,17 @@ function initArchiveModule() {
     });
 
     const deleteBtn = document.getElementById('arc-detail-delete');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
-                if (confirm("真的要从档案馆中彻底抹除这部作品的记录吗？")) {
-                    try {
-                        await supabase.from('acg_archives').delete().eq('id', currentDetailId);
-                        modal.classList.remove('show');
-                        await loadArchivesFromCloud();
-                    } catch(e) { alert("删除失败！"); }
-                }
-            });
-        }
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            if (confirm("真的要从档案馆中彻底抹除这部作品的记录吗？")) {
+                try {
+                    await supabase.from('acg_archives').delete().eq('id', currentDetailId);
+                    modal.classList.remove('show');
+                    await loadArchivesFromCloud();
+                } catch(e) { alert("删除失败！"); }
+            }
+        });
+    }
 
     // 网页加载时启动同步
     loadArchivesFromCloud();
